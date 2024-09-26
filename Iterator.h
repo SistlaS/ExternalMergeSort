@@ -12,7 +12,7 @@ public:
 	// ...
 private:
 	// ...
-}; // class Row
+}; 
 
 class Plan
 {
@@ -24,7 +24,7 @@ public:
 protected:
 	char const * const _name;
 private:
-}; // class Plan
+}; 
 
 class Iterator
 {
@@ -36,4 +36,4 @@ public:
 	virtual void free (Row & row) = 0;
 private:
 	RowCount _rows;
-}; // class Iterator
+}; 
