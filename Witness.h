@@ -9,7 +9,7 @@ public:
 	Iterator * init () const;
 private:
 	Plan * const _input;
-}; // class WitnessPlan
+}; 
 
 class WitnessIterator : public Iterator
 {
@@ -22,4 +22,4 @@ private:
 	WitnessPlan const * const _plan;
 	Iterator * const _input;
 	RowCount _rows;
-}; // class WitnessIterator
+}; 
