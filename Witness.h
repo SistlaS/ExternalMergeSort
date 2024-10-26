@@ -19,6 +19,9 @@ public:
 	bool next (Row & row);
 	void free (Row & row);
 private:
+	void witness (Row& row);
+	int countInversions(Row& row);
+	int calculateXOR(Row& row);
 	WitnessPlan const * const _plan;
 	Iterator * const _input;
 	RowCount _rows;
