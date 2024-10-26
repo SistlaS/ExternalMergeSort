@@ -8,14 +8,21 @@ int main (int argc, char * argv [])
 {
 	TRACE (true);
 
+	// Plan * const plan =
+	// 		new WitnessPlan ("output",
+	// 			new SortPlan ("*** The main thing! ***",
+	// 				new WitnessPlan ("input",
+	// 					new FilterPlan ("half",
+	// 						new ScanPlan ("source", 7)
+	// 					)
+	// 				)
+	// 			)
+	// 		);
+
 	Plan * const plan =
-			new WitnessPlan ("output",
-				new SortPlan ("*** The main thing! ***",
-					new WitnessPlan ("input",
-						new FilterPlan ("half",
-							new ScanPlan ("source", 7)
-						)
-					)
+			new WitnessPlan ("input",
+				new FilterPlan ("half",
+					new ScanPlan ("source", 1)
 				)
 			);
 

@@ -42,17 +42,23 @@ bool FilterIterator::next (Row & row)
 
 	for (;;)
 	{
+		// return false if no more elements are present in the row
 		if ( ! _input->next (row))  return false;
 
 		++ _consumed;
-		if (_consumed % 2 != 0) // the fake filter predicate
-			break;
+		// if (_consumed % 2 != 0) // the fake filter predicate
+		// 	break;
+		if (row.isFiltered()) {
+            ++_produced;  // Increment produced count
+			_input->free (row);
+            return true;  // Row is valid, return it
+        }
 
 		_input->free (row);
 	}
 
-	++ _produced;
-	return true;
+	// ++ _produced;
+	return false;
 }
 
 void FilterIterator::free (Row & row)
