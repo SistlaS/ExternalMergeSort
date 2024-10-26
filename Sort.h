@@ -9,7 +9,7 @@ public:
 	Iterator * init () const;
 private:
 	Plan * const _input;
-};
+}; // class SortPlan
 
 class SortIterator : public Iterator
 {
@@ -22,4 +22,4 @@ private:
 	SortPlan const * const _plan;
 	Iterator * const _input;
 	RowCount _consumed, _produced;
-};
+}; // class SortIterator

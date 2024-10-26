@@ -9,7 +9,7 @@ public:
 	Iterator * init () const;
 private:
 	RowCount const _count;
-};
+}; // class ScanPlan
 
 class ScanIterator : public Iterator
 {
@@ -21,4 +21,4 @@ public:
 private:
 	ScanPlan const * const _plan;
 	RowCount _count;
-}; 
+}; // class ScanIterator
