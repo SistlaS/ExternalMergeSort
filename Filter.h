@@ -1,5 +1,5 @@
 #include "Iterator.h"
-
+#include <string>
 class FilterPlan : public Plan
 {
 	friend class FilterIterator;

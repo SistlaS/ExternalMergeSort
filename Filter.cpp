@@ -1,4 +1,5 @@
 #include "Filter.h"
+#include <string>
 
 FilterPlan::FilterPlan (char const * const name, Plan * const input)
 	: Plan (name), _input (input)

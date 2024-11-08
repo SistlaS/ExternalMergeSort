@@ -22,7 +22,7 @@ int main (int argc, char * argv [])
 	Plan * const plan =
 			new WitnessPlan ("input",
 				new FilterPlan ("half",
-					new ScanPlan ("source", 1)
+					new ScanPlan ("source", 10)
 				)
 			);
 

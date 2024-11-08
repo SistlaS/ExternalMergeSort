@@ -2,20 +2,22 @@
 #pragma once
 #include "defs.h"
 #include <vector>
-
+#include <string>
 typedef uint64_t RowCount;
+using namespace std;
+#define COLUMN_COUNT 4
+#define DOMAIN_OF_VALUES 10
 
 class Row
 {
 public:
-	std::vector<int> data {7,5,2,3,5};
+	vector<string> data;
 	int offsetValueCode;
 	Row ();
 	virtual ~Row ();
 	bool isFiltered() const {
-        for (int value : data) {
-			std::cout<<value<<" val ";
-            if (value < 2) return false;  // value > 4 ==> row fails the filter
+        for (string value : data) {
+            if (stoi(value) < 2) return false;  // value > 4 ==> row fails the filter
         }
         return true;  
     }

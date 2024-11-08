@@ -1,5 +1,6 @@
 #include "Witness.h"
 #include <iostream>
+#include <string>
 WitnessPlan::WitnessPlan (char const * const name, Plan * const input)
 	: Plan (name), _input (input)
 {
@@ -75,8 +76,8 @@ void WitnessIterator::witness(Row& row){
 
 int WitnessIterator::calculateXOR(Row& row) {  // Definition with const
     int xorResult = 0;
-    for (int value : row.data) {
-        xorResult ^= value;
+    for (std::string value : row.data) {
+        xorResult ^= std::stoi(value);
     }
     return xorResult;
 }
