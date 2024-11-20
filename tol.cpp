@@ -102,6 +102,25 @@ void PQ::delete_(Index const index)
 {
     pass(index, late_fence(index));
 }
+bool PQ::Node::less (Node & other, bool const full)
+{
+    Offset offset;
+    if (full) offset = Offset (−1);
+    else if (key != other.key) return (key < other.key);
+    else offset = offsetFromKey (key);
+    bool const isLess = less (index, other.index, offset);
+    Node & loser = (isLess ? other : * this);
+    loser.key = keyFromOffset (loser.index, offset);
+    return isLess;
+}
+
+bool less (Index const left, Index const right, Offset & offset)
+{
+    while ( ++ offset < size)
+    if (data [left] [offset] != data [right] [offset])
+    return data [left] [offset] < data [right] [offset];
+    return false;
+}
 
 int main()
 {

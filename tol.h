@@ -1,12 +1,14 @@
 typedef unsigned int Key;
 typedef unsigned int Index;
 typedef int Level;
+typedef unsigned int Offset;
 
 #define badIndex -1;
 
 struct Node{
     Index index;
     Key key;
+    Offset offset;
 
     void init(Index idx, Key k){
         index = idx;
