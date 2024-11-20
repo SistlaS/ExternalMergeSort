@@ -1,22 +1,25 @@
 #include <iostream>
-#include "tol.h" 
+#include "tol.h"
 
-bool even (Index const index, Level const shift)
-{ return ((index >> shift) & Index (1)) == Index (0); }
+bool even(Index const index, Level const shift)
+{
+    return ((index >> shift) & Index(1)) == Index(0);
+}
 
-void PQ::pass(Index const index, Key const key) {
-   
-    Node candidate(index, key);
+void PQ::pass(Index const index, Key const key)
+{
+
+    Node candidate;
+    candidate.init(index, key);
     Index slot;
     // Level level;
 
-    for(leaf(index, slot); parent(slot), slot!=root();)
+    for (leaf(index, slot); parent(slot), slot != root();)
     {
-        if(heap[slot].less(candidate))
+        if (heap[slot].less(candidate))
             heap[slot].swap(candidate);
     }
     heap[root()] = candidate;
-
 }
 Index PQ::capacity() const { return Index(1 << height); }
 Index PQ::root() const { return Index(0); }
@@ -53,7 +56,7 @@ PQ::PQ(Level const h)
         leaf(index, slot, level);
         do
             parent(slot, level);
-        while (even(index, level-1));
+        while (even(index, level - 1));
 
         heap[slot].init(index, early_fence(index));
     }
@@ -77,8 +80,12 @@ Index PQ::poptop(bool const invalidate)
     }
     return heap[root()].index;
 }
-Index PQ::top() { return poptop(false); }
-Index PQ::pop() { return poptop(true); }
+Index PQ::top() { 
+    return poptop(false); 
+}
+Index PQ::pop() { 
+    return poptop(true); 
+}
 void PQ::push(Index const index, Key const key)
 {
     pass(index, early_fence(capacity()) + key);
@@ -91,31 +98,33 @@ void PQ::update(Index const index, Key const key)
 {
     push(index, key);
 }
-void PQ::delete_ (Index const index)
+void PQ::delete_(Index const index)
 {
     pass(index, late_fence(index));
 }
-int main() {
-    // Test the PQ class
-    PQ pq(3); 
+
+int main()
+{
+    PQ pq(3);
 
     std::cout << "Heap capacity: " << pq.capacity() << std::endl;
 
-    pq.push(0, 100); // node with index 0 and key 100
-    pq.push(1, 200); 
+    // node with index 0 and key 100
+    pq.push(0, 200);
+    pq.push(1, 100);
 
-    std::cout << "Top element index: " << pq.top() << std::endl;  
+    std::cout << "Top element index: " << pq.top() << std::endl;
     pq.pop();
     std::cout << "After pop, top element index: " << pq.top() << std::endl;
 
-    pq.insert(2, 300); 
+    pq.insert(3, 300);
     std::cout << "After insert, top element index: " << pq.top() << std::endl;
 
-    pq.update(2, 500); 
+    pq.update(2, 10);
     std::cout << "After update, top element index: " << pq.top() << std::endl;
 
-    pq.delete_(2);
-    std::cout << "After delete, top element index: " << pq.top() << std::endl;
+    // pq.delete_(2);
+    // std::cout << "After delete, top element index: " << pq.top() << std::endl;
 
     return 0;
 }

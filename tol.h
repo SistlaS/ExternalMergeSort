@@ -12,6 +12,18 @@ struct Node{
         index = idx;
         key = k;
     }
+
+    void swap(Node &candidate){
+        std::swap(index, candidate.index);
+        std::swap(key, candidate.key);
+    }
+
+    bool less (Node candidate){
+        if(key <= candidate.key){
+            return true;
+        }
+        return false;
+    }
 };
 
 class PQ{
