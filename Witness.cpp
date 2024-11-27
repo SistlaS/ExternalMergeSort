@@ -44,14 +44,22 @@ bool WitnessIterator::next (Row & row)
 	if (!_input->next(row)) return false;
 
 	// Perform witness checks
-	witness(row);
-
+	
+	// checkOrder(row)
 	++_rows; // Increment row count
+	witness(row);
 	return true; // Return true as we've successfully retrieved a row
 
 }
 
+// bool WitnessIterator::checkOrder(Row &row){
+
+// }
+
 void WitnessIterator::witness(Row& row){
+	for (auto x : row.data){
+		std::cout<<x<<" ";
+	}
 	int currRowCounts = row.data.size();
 	std::cout << "currRowCounts: " << currRowCounts << std::endl;
 	int xorResult = calculateXOR(row);

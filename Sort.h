@@ -18,8 +18,14 @@ public:
 	~SortIterator ();
 	bool next (Row & row);
 	void free (Row & row);
+	void quickSort(std::vector<std::vector<std::string>> data);
+	// void ssdSort();
+	// void externalMerge();
+	// void clearTempFile();
 private:
 	SortPlan const * const _plan;
 	Iterator * const _input;
 	RowCount _consumed, _produced;
+	// int _recsize;
+	// uint32_t runs;
 };

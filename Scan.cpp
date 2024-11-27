@@ -3,11 +3,8 @@
 #include <fstream>
 #include <random>
 #include "Scan.h"
-#include <filesystem>
 using namespace std;
 
-#define COLUMN_COUNT 4
-#define DOMAIN_OF_VALUES 10
 
 ScanPlan::ScanPlan (char const * const name, RowCount const count)
 	: Plan (name), _count (count)
@@ -45,7 +42,7 @@ int generate_rand_int() {
 	// Mersenne twister - seeding it with a random number
 	mt19937 generator(rand());
 
-	uniform_int_distribution<int> distribution(0,1000);
+	uniform_int_distribution<int> distribution(0,DOMAIN_OF_VALUES);
 	return distribution(generator);
 }
 
@@ -63,7 +60,7 @@ bool ScanIterator::next (Row & row)
 	// open it in append mode
 	ofstream file;
 
-	file.open(fileName, ios::out);
+	file.open(fileName, ios::app);
 
 	// return if you can't open file
 	if (!file) {

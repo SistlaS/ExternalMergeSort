@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <cstdio>
 
-typedef uint8_t byte;
+using namespace std;
 
 #define slotsof(a)	(sizeof (a) / sizeof (a[0]))
 
-#define nullptr	((void *) NULL)
+// #define nullptr	((void *) NULL)
 
 #define yesno(b)	((b) ? "yes" : "no")
 
@@ -134,3 +134,11 @@ size_t msb (size_t const x);
 int msbi (size_t const x);
 char const * YesNo (bool const b);
 char const * OkBad (bool const b);
+
+typedef long long unsigned int lluint;
+typedef long unsigned int luint;
+typedef long long int llint;
+typedef long int lint;
+typedef short unsigned int suint;
+typedef short int sint;
+typedef uint8_t byte;
