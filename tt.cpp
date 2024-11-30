@@ -1,4 +1,4 @@
-#include "Tree.h"
+#include "tt.h"
 
 void Node::printNode() {
     cout << "Index: " << Index 
