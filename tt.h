@@ -1,39 +1,58 @@
-#pragma once
-
-#include "defs.h"
-#include "Record.h"
 #include <vector>
+#include <iostream>
+#include <limits.h>
+#include <string>
 
-class Record;
+using namespace std;
+#define DEBUG false;
 
-struct Node{
-    Record *curr_rec;
-    llint level;
-    bool is_empty;
-    bool is_leaf;
-    int run_id;
 
-    Node(){
-        // rec = NULL;
-        level = 0;
-        is_empty = true;
-        is_leaf = false;
-    }
+class Node{
+	private:
+		int Index;
+		int Data;
+		// vector<int> Data;
+		string ovc;
+	public:
+	    Node() : Data(INT_MIN), Index(-1), ovc("-1") {}
+
+	    Node(int x) : Data(x), Index(-1), ovc("-1") {}
+
+	    // Node(int data, int index = -1, int ovc = -1) 
+	    //     : Data(data), Index(index), ovc(ovc) {}
+
+	    bool is_greater(Node incoming);
+
+	    int getIndex() const { return Index; }
+	    void setIndex(int index) { Index = index; }
+
+	    int getData() const { return Data; }
+	    void setData(const int data) { Data = data; }
+
+	    string getOvc() const { return ovc; }
+	    void setOvc(string ovc_value) { ovc = ovc_value; }
+
+	    void printNode();
 };
 
 class Tree{
-    public:
-        struct Node *heap;
-        std::vector<Record *> generated_run;
-        llint tot_leaves, tot_nodes, height;
-        lluint tot_record_count;
+	public:
+		int capacity;
+		int leaf_nodes;
+		vector<Node> heap;
 
-        Tree();
-        Tree(llint k);
-        int left(int i);
-		int right(int i);
-        int getParentIndex(int i);
-		// Deconstructor
+		Tree(int capacity);
+
+		void construct_tree(vector<int> unsorted_input);
+		int pop_winner();
+
+		//utility funcs
+		bool is_empty();
+		int parent_index(int);
+		int leftChild_index(int);
+		int rightChild_index(int);
+		void print_tree();
+
 		~Tree();
 
 };
