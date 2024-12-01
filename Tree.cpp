@@ -1,6 +1,6 @@
 #include "Tree.h"
 
-int ROW_SIZE = 3;
+int ROW_SIZE = 4;
 int BUFFER_SIZE = 16;
 
 
@@ -158,7 +158,7 @@ void Tree::construct_tree(){
             temp = Node(rec, index);
             input[i].pop();
         }
-        temp.printNode();
+        // temp.printNode();
         heap[index] = temp;
     }
 
@@ -179,6 +179,7 @@ void Tree::construct_tree(){
 			parent_indx = parent_index(parent_indx);
 		}
 	}
+	print_tree();
 }
 
 bool Tree::is_empty(){
@@ -203,15 +204,16 @@ Node Tree::pop_winner() {
     // For an internal sort, insert INT_MAX; otherwise, use the next record
     Node new_rec;
     int ip_queue_no = winner_index-leaf_nodes;
+    // cout<<ip_queue_no<<" -- "<<input[ip_queue_no].front()<<endl;
     if (input[ip_queue_no].empty()) {
         new_rec = Node({INT_MAX});
     } else {
         string next_data = input[ip_queue_no].front();
         vector<int> rec = convertToInt(next_data);
         new_rec = Node(rec, winner_index);
-        input[winner_index].pop();
+        input[ip_queue_no].pop();
     }
-
+    // new_rec.printNode();
     heap[winner_index] = new_rec;
 
     // Start the propagation from the winner's index
@@ -273,6 +275,8 @@ void Tree::flush_to_op(bool eof){
 void Tree::generate_runs(){
 	while(!is_empty()){
     	Node temp = pop_winner();
+    	cout<<"popping :";
+    	temp.printNode();
     	opBuffer.push_back(temp.getDataStr());
     	if(opBuffer.size()==BUFFER_SIZE){ 
     		flush_to_op(false);
@@ -282,64 +286,4 @@ void Tree::generate_runs(){
     // Final flush to ensure all data is written
     flush_to_op(true);
 
-}
-
-int main(int argc, char const *argv[])
-{
-
-
-    vector<queue<string>> input;
-
-    // Example: Push comma-separated strings to the input queue
-    queue<string> q1;
-    q1.push("1,2,3,");
-    input.push_back(q1);
-
-    queue<string> q2;
-    q2.push("0,2,6,");
-    input.push_back(q2);
-
-    queue<string> q3;
-    q3.push("0,8,9,");
-    input.push_back(q3);
-
-    // queue<string> q4;
-    // q4.push("0,9,12,");
-    // input.push_back(q4);
-
-    // Test: Tree with a specific capacity
-    uint n = 4;
-    string outputFilename = "output.txt";
-
-    Tree tree(n, input, outputFilename);
-    // Construct the tree
-    // tree.construct_tree();
-    
-    tree.print_tree();
-    // tree.generate_runs();
-
-	// uint n = 7;
-    // Tree tree(n);
-
-    // vector<int> test = {3,5,0,1,8,7,77,INT_MAX};
-    // vector<vector<int>> test = {{1,3,1},{5,4,1}, {0,3,0}, {0,1,1}, {0,1,0}, {0,0,0}};
-    // tree.construct_tree(test);
-    // tree.print_tree();
-    // while(!tree.is_empty()){
-    // 	cout<<"Popping min : "<<endl;
-    // 	Node temp = tree.pop_winner();
-    // 	temp.printNode();
-    // 	// tree.print_tree();
-    // }
-    
-    // tree.generate_runs();
-
-    // cout<<"Popping min : "<<endl;
-    // Node temp = tree.pop_winner();
-    // temp.printNode();
-    // tree.print_tree();
-    // cout<<"Popping min : "<<tree.pop_winner()<<endl;
-    // tree.print_tree();
-
-	return 0;
 }
