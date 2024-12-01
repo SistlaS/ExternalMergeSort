@@ -4,9 +4,10 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <queue>
 
 
-typedef uint uint;
+typedef unsigned int uint;
 using namespace std;
 #define DEBUG false;
 
@@ -20,6 +21,7 @@ class Node{
 	    Node() : Data({INT_MIN}), Index(-1), ovc(-1) {}
 
 	    Node(vector <int> x) : Data(x), Index(-1), ovc(-1) {}
+		Node(vector <int> x, uint index) : Data(x), Index(index), ovc(-1) {}
 
 	    // Node(int data, int index = -1, int ovc = -1) 
 	    //     : Data(data), Index(index), ovc(ovc) {}
@@ -48,15 +50,16 @@ class Tree{
 		uint capacity;
 		uint leaf_nodes;
 		vector<Node> heap;
+		vector<queue<string>> input;
 		vector<string> opBuffer;
-		string opFilename = "Test.txt";
+		string opFilename;
 
-		Tree(uint capacity);
+		Tree(uint capacity, vector<queue<string>> input, string opFilename);
 
-		void construct_tree(vector<vector<int>> unsorted_input);
+		void construct_tree();
 		Node pop_winner();
 		void generate_runs();
-		void flush_to_op();
+		void flush_to_op(bool eof);
 
 		//utility funcs
 		bool is_empty();
