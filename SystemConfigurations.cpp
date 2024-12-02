@@ -16,9 +16,9 @@ int SystemConfigurations::record_size = column_count * column_value_size; // 4*4
 
 
 /* *************************Sizes(in # of records)******************************** */
-ByteCount SystemConfigurations::page_size = 4;
-ByteCount SystemConfigurations::cache_size = 3;      // 50 KB Cache
-ByteCount SystemConfigurations::ram_size = 5;     // 5 MB RAM
+uint SystemConfigurations::page_size = 4;
+uint SystemConfigurations::cache_size = 3;      // 50 KB Cache
+uint SystemConfigurations::ram_size = 5;     // 5 MB RAM
 // ByteCount SystemConfigurations::disk_size = 100*1024*1024;   // Disk size is INF
 
 /* *************************Latency&Bandwidth (in bytes & ms)******************** */
