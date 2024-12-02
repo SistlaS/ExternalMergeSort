@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <queue>
+#include "Tree.h"
 
 using namespace std;
 
@@ -79,6 +80,26 @@ void print_file_contents(string filename){
     f.close();
 }
 
+bool isFileEmpty(string filename){
+    std::ifstream file(filename, std::ios::binary);
+    if (!file) {
+        std::cerr << "Error opening file!" << std::endl;
+        return 1;
+    }
+
+    if (file.peek() == std::ifstream::traits_type::eof()) {
+        std::cout << "Filename: "<< filename <<" is empty." << std::endl;
+        file.close();
+        return 0;
+        
+    } else {
+        std::cout << "File is not empty." << std::endl;
+        file.close();
+        return 1;   
+    }
+    
+}
+
 vector<int> SortIterator::computeGracefulDegradationFactors(int W, int F){
     vector<int> gd;
 
@@ -122,16 +143,23 @@ bool SortIterator::writeDataIntoFile(string fileName, string data, int mode, str
 	return true;
 }
 
-bool SortIterator::copyFileContents(string sourceFileName, string destinationFileName){
+bool SortIterator::copyFileContents(string sourceFileName, string destinationFileName, int mode){
 	// Open the source file in input mode
-    ifstream inFile(sourceFileName, ios::in);
+    ifstream inFile(sourceFileName);
     if (!inFile) {
         cout << "Error: Could not open source file " << sourceFileName << endl;
         return false;
     }
 
     // Open the destination file in output mode (will append if exists)
-    ofstream outFile(destinationFileName, ios::app);
+    ofstream outFile;
+	if(mode==0){
+		outFile.open(destinationFileName, ios::out); // overwrite mode
+	}
+	else{
+		outFile.open(destinationFileName, ios::app); // append mode
+	}
+
     if (!outFile) {
         cout << "Error: Could not open destination file " << destinationFileName << endl;
         return false;
@@ -144,7 +172,7 @@ bool SortIterator::copyFileContents(string sourceFileName, string destinationFil
     inFile.close();
     outFile.close();
 
-    cout << "File contents copied from " << sourceFileName << " to " << destinationFileName << endl;
+    cout << "File contents appended from " << sourceFileName << " to " << destinationFileName << endl;
 
     return true;
 }
@@ -161,15 +189,18 @@ void SortIterator::firstPass(bool isRAM){
     // TODO: write to-sort chunks to RAM in terms of RAM page size
     // TODO: write the sorted chunks to Disk in terms of Disk page size
     int W = isRAM ? SortIterator::numRAMRecords : SystemConfigurations::num_records;
-    int F = isRAM ? SystemConfigurations::cache_size : SystemConfigurations::ram_size;
-
-    // if(isRAM) tt.init(F);
+    uint F = isRAM ? SystemConfigurations::cache_size : SystemConfigurations::ram_size;
      
     vector<int> gd = computeGracefulDegradationFactors(W,F);
     cout<<"Graceful degradation: "<<endl;
     for(int i=0;i<gd.size();i++){cout<<gd[i]<<" ";}
     cout<<endl;
-    SortIterator::gdFactors = gd;
+
+    if(isRAM){
+         SortIterator::ram_gdFactors = gd;
+    } else {
+         SortIterator::disk_gdFactors=  gd;
+    }
 
     std::ifstream input_file(fromFile,ios::in);
     if (!input_file or !input_file.is_open())
@@ -180,34 +211,28 @@ void SortIterator::firstPass(bool isRAM){
 
     // buffer contains the chunk of records
 	string buffer;
-    // token contains each record
-	string token;
+	string record;
     // number of tokens encountered
-	int tokenCount = 0;
-    int totalTokenCount=0;
+	int recordCount = 0;
 
     // input for TT
     vector<queue<string>>v;
 
 	for(int i=0;i<gd.size();i++){
-        cout<<"Vlaue of i: "<<i<<" and gd[i] value: "<< gd[i]<<endl;
+        cout<<"Value of i: "<<i<<" and gd[i] value: "<< gd[i]<<endl;
         // Step 1: populate the buffer with gd[i] tokens
         if(isRAM){
             cout<< "Number of records in this run:" << gd[i]<<endl;
         }else cout<< "Number of sorted runs in this run:" << gd[i]<<endl;
 
-		while(tokenCount < gd[i] && !input_file.eof()){
+		while(recordCount < gd[i] && !input_file.eof()){
             
-            if(getline(input_file, token, '\n')){
-                buffer += token += "\n";
-                tokenCount++;
-                totalTokenCount++;
+            if(getline(input_file, record, '|')){
+                buffer += record += "|";
+                recordCount++;
             }
 		}
-        cout << "Buffer :" << buffer << endl;
-        if(buffer == ""){
-            cout<<"file is empty, break\n";
-        }
+        cout << "Buffer: " << buffer << endl;
 
         // Step 2: Write buffer to toFile
         bool isWriteSuccess = writeDataIntoFile(toFile, buffer, 1, "");
@@ -216,15 +241,17 @@ void SortIterator::firstPass(bool isRAM){
 			exit(1);
 		}
         cout<< "Wrote buffer to file " << toFile <<" successfully."<<endl;
+        print_file_contents(toFile);
 
         // Step 3: Clear values
         buffer.clear();
-        tokenCount=0;
+        recordCount=0;
 
         // Step 4: Perform sort in smaller memory level
         if(isRAM){
             // Input: Unsorted Cache.txt
             cout<<"Sort cache.txt"<<endl;
+
             std::ifstream ip(toFile,ios::in);
             if (!ip or !ip.is_open())
             {
@@ -232,179 +259,209 @@ void SortIterator::firstPass(bool isRAM){
                 exit(1);
             }
 
-            for(int i=0;i<gd[i];i++){
+            record = "";
+            v.clear();
+            
+            for(int j=0;j<gd[i];j++){
                 queue<string> q;
                 // queue of size 1
-                if(getline(ip, token, '\n')){
-                    if(token!="")q.push(token);
+                if(getline(ip, record, '|')){
+                    cout<<"Token in queue: "<< record <<"\n";
+                    if(record!=""){   
+                        q.push(record);
+                    }
                 }
-                if(token!=""){
-                    cout<<"Token in queue: "<< token <<"\n";
-                    v.push_back(q);
-                }
-
+                v.push_back(q);
                 if(ip.eof()) break;
             }
 
             ip.close();
 
-            // TT(F,v,toFile)
+            // Clear toFile
+            ofstream outFile("Cache.txt", ios::trunc);
+            outFile.close();
+
             // Output: Sorted Cache.txt
-            // TODO: Sort in cache with TT and write back in cache.txt
+            Tree tree(F,v, toFile);
+            
             cout<<"Cache is sorted: \n";
             print_file_contents(toFile);
         }else{
-            cout<<"Sort ram.txt"<<endl;
             SortIterator::numRAMRecords=gd[i];
+            cout<<"Sort RAM.txt with gdFactor "<<numRAMRecords<<endl;
             ramSort();
         }
 
-        // Step 5: Write sorted data into temp file
-        bool isSortWriteSuccess = copyFileContents(toFile, tempFile);
+        // Step 5: Append sorted data into temp file
+        bool isSortWriteSuccess = copyFileContents(toFile, tempFile,1);
 		if (!isSortWriteSuccess) {
 			cout << "Error: Could not copy the file " << toFile << " into " << tempFile << endl;
 			exit(1);
 		}
-        cout<<"Write sorted data into temp file: "<<tempFile<<endl;
-        print_file_contents(tempFile);
 
         // Step 6: Clear toFile
-        // ofstream outFile(toFile, ios::trunc); // truncate file length to 0, effectively clearing it.
-        // outFile.close();
-        cout<<"Clear toFile: "<<toFile<<endl;
-        print_file_contents(toFile);
-
+        ofstream outFile5(toFile, ios::trunc); // truncate file length to 0, effectively clearing it.
+        outFile5.close();
+   
+        cout<<"Successfully cleared toFile: "<<toFile<<endl;
     }
+
     cout<<"File: "<<tempFile<<" is first pass sorted\n";
     // close the old file stream
 	input_file.close();
 
 	// clear fromFile, and save contents of tempFile in it
-	// ofstream outFile(fromFile, ios::trunc); // truncate file length to 0, effectively clearing it.
-	// outFile.close();
-    // cout<<"Cleared fromFile: "<<fromFile<<endl;
-    // print_file_contents(fromFile);
+	ofstream outFile3(fromFile, ios::trunc); // truncate file length to 0, effectively clearing it.
+    outFile3.close();
+    cout<<"Cleared fromFile: "<<fromFile<<endl;
 
-	// copy contents of tempFile into fromFile
-	bool isDiskContentsCopied = copyFileContents(tempFile,fromFile);
+	// overwrite contents of tempFile into fromFile
+	bool isDiskContentsCopied = copyFileContents(tempFile,fromFile,0);
 	if (!isDiskContentsCopied) {
 		cout << "Error: Could not copy the file " << tempFile << " into " << fromFile << endl;
         exit(1);
 	}
-    cout<<"copy contents of tempFile into fromFile: "<<fromFile<<endl;
+    cout<<"Overwritten contents of fromFile: "<<fromFile<<endl;
     print_file_contents(fromFile);
 
 	// clear tempFile
-	// ofstream outFile2(tempFile, ios::trunc); // truncate file length to 0, effectively clearing it.
-	// outFile2.close();
-
+	ofstream outFile2(tempFile, ios::trunc); // truncate file length to 0, effectively clearing it.
+    outFile2.close();
 }
 
 // perform "external merge sorting" - merge sorted runs till only one run remains
 void SortIterator::mergeSort(bool isRAM){
-    // TODO: Merge sort happens only in RAM
     string fromFile = isRAM ? "RAM.txt" : "Disk.txt";
     string toFile = isRAM ? "Cache.txt" : "RAM.txt";
     string tempFile = isRAM ? "RAM2.txt" : "Disk2.txt";
 
-    int F = isRAM ? SystemConfigurations::cache_size : SystemConfigurations::ram_size;
+    cout<<"In merge sort; isRAM: "<<isRAM<<"\n";
 
-    // TODO: TT.init(F);
+    uint F = SystemConfigurations::ram_size;    
 
     // sizes of runs which have already been sorted
-    vector<int>runsProcessed = SortIterator::gdFactors; 
-
-    std::ifstream input_file(fromFile,ios::in);
-    if (!input_file or !input_file.is_open())
-    {
-        cout << "Could not open file: " << fromFile << "...Exit from program" << endl;
-        exit(1);
-    }
-
+    vector<int>runsProcessed = isRAM? SortIterator::ram_gdFactors: SortIterator::disk_gdFactors;
+    cout<<"runs processed in first pass: "<<endl;
+    for(int i=0;i<runsProcessed.size();i++){cout<<runsProcessed[i]<<" ";}
+    cout<<endl;
+    
     while(runsProcessed.size()>1){
-        vector<int> gd2 = computeGracefulDegradationFactors(runsProcessed.size(),F);
 
-        // number of tokens processed in each new run (of gd2)
-        vector<int> tokProc;
-        // input for TT
-        vector<queue<string>>v;
-        // ptr indicates at what pos we are in the runsProcessed array
-        int prevRunPtr = 0;
+        cout<<"In merge sort; # of sorted runs "<<runsProcessed.size()<<"\n";
 
-        // # of tokens processed
-        int tokenCount=0;
-        string token;
-
-        for(int i=0;i<gd2.size();i++){
-            // number of runs to be processed
-            int numRunsProc = gd2[i]; 
-            for(int j=prevRunPtr;j<prevRunPtr+numRunsProc; j++){
-                queue<string> q;
-                while(tokenCount < runsProcessed[j] && !input_file.eof()){
-                    if(getline(input_file, token, '\n')){
-                        q.push(token);
-                        tokenCount++;
-                    }
-                }
-                v.push_back(q);
-
-                // TODO: Sort using v in TT and append O/P to toFile
-
-                // Step 5: Write sorted data into temp file
-                bool isSortWriteSuccess = copyFileContents(toFile, tempFile);
-                if (!isSortWriteSuccess) {
-                    cout << "Error: Could not copy the file " << toFile << " into " << tempFile << endl;
-                    exit(1);
-                }
-
-                // Step 6: Clear toFile
-                ofstream outFile(toFile, ios::trunc); // truncate file length to 0, effectively clearing it.
-                outFile.close(); 
-                    
-            }
-            prevRunPtr+=numRunsProc;
-
-            // number of tokens processed in this run
-            tokProc.push_back(tokenCount);
-            // reset to 0
-            tokenCount=0;
+        std::ifstream input_file(fromFile,ios::in);
+        if (!input_file or !input_file.is_open())
+        {
+            cout << "Could not open file: " << fromFile << "...Exit from program" << endl;
+            exit(1);
         }
 
-        // tokProc is now processed, hence it becomes the new runsProcessed
-        runsProcessed = tokProc;
-        tokProc.clear();
+        vector<int> gd2 = computeGracefulDegradationFactors(runsProcessed.size(),F);
+        cout<<"Graceful degradation: "<<endl;
+        for(int i=0;i<gd2.size();i++){cout<<gd2[i]<<" ";}
+        cout<<endl;
 
+        int numRuns = 0;
+        string bunchOfRuns;
+
+        for(int i=0;i<gd2.size();i++){
+
+            vector<queue<string>>v;
+            while(numRuns < gd2[i] && !input_file.eof()){
+                queue<string> q;
+                // '\n' delimits sorted runs
+                // '|' delimits records
+                // ',' delimits columns
+                while(getline(input_file, bunchOfRuns, '\n')){
+                    // we have a bunch of records (which are sorted wrt each other)
+                    // put this bunch in a queue
+                    cout<<"Bunch of runs: "<<bunchOfRuns<<endl;
+                    std::stringstream ss(bunchOfRuns);
+                    string record;
+                    while (getline(ss, record, '|')) {
+                        q.push(record);
+                        cout<<record<<" ";
+                        numRuns++;
+                    }
+                    cout<<endl;  
+                }
+                v.push_back(q);            
+            }
+
+            // Clear toFile
+            ofstream outFile4(toFile, ios::trunc);
+            outFile4.close();
+            
+            // Output: Sorted toFile
+            Tree tree(F,v,toFile);
+
+            cout<<"Sorted toFile: "<<toFile<<endl;
+            print_file_contents(toFile);
+
+            // Step 5: Write sorted data into temp file
+            bool isSortWriteSuccess = copyFileContents(toFile, tempFile,1);
+            if (!isSortWriteSuccess) {
+                cout << "Error: Could not copy the file " << toFile << " into " << tempFile << endl;
+                exit(1);
+            }
+
+            // Step 6: Clear toFile
+            ofstream outFile(toFile, ios::trunc); // truncate file length to 0, effectively clearing it.
+            outFile.close();
+            cout<<"I am here\n";
+        }
+
+        runsProcessed = gd2;
+
+        // close the old file stream
+        input_file.close();
+
+        // clear fromFile, and save contents of tempFile in it
+        ofstream outFile(fromFile, ios::trunc); // truncate file length to 0, effectively clearing it.
+        outFile.close();
+
+        // copy contents of tempFile into fromFile
+        bool isDiskContentsCopied = copyFileContents(tempFile,fromFile,0);
+        cout<<"REACHER DFVIDFNVDFV\n";
+        if (!isDiskContentsCopied) {
+            cout << "Error: Could not copy the file " << tempFile << " into " << fromFile << endl;
+            exit(1);
+        }
+
+        ofstream outFile2(tempFile, ios::trunc); // truncate file length to 0, effectively clearing it.
+        outFile2.close();
+        cout<<"DONE!\n";
     }
-
-    // close the old file stream
-	input_file.close();
-
-	// clear fromFile, and save contents of tempFile in it
-	ofstream outFile(fromFile, ios::trunc); // truncate file length to 0, effectively clearing it.
-	outFile.close();
-
-	// copy contents of tempFile into fromFile
-	bool isDiskContentsCopied = copyFileContents(tempFile,fromFile);
-	if (!isDiskContentsCopied) {
-		cout << "Error: Could not copy the file " << tempFile << " into " << fromFile << endl;
-        exit(1);
-	}
-
-	// clear tempFile
-	ofstream outFile2(tempFile, ios::trunc); // truncate file length to 0, effectively clearing it.
-	outFile2.close();
 }
 
 void SortIterator::diskSort(){
     cout<<"Inside disk sort\n";
     firstPass(false);
-    cout<<"MERGEsORT disk sort\n";
+    cout<<"MERGESORT DISK sort\n";
     mergeSort(false);
+
+    // cleanup
+    ofstream outFile2("RAM.txt", ios::trunc); // truncate file length to 0, effectively clearing it.
+    outFile2.close();
+    cout<<"Cleared RAM.txt!\n";
+
+        ofstream outFile4("RAM2.txt", ios::trunc); // truncate file length to 0, effectively clearing it.
+    outFile4.close();
+    cout<<"Cleared RAM2.txt!\n";
+
+        ofstream outFile3("Disk2.txt", ios::trunc); // truncate file length to 0, effectively clearing it.
+    outFile3.close();
+    cout<<"Cleared Disk2.txt!\n";
+
+        ofstream outFile5("Cache.txt", ios::trunc); // truncate file length to 0, effectively clearing it.
+    outFile5.close();
+    cout<<"Cleared Cache.txt!\n";
+
 }
 
 void SortIterator::ramSort(){
     cout<<"Inside RAM sort\n";
     firstPass(true);
-    cout<<"MERGEsORT disk sort\n";
+    cout<<"MERGESORT RAM sort\n";
     mergeSort(true);
 }
