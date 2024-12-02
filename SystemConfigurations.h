@@ -21,9 +21,9 @@ class SystemConfigurations{
 
 
         /* *************************Sizes(in # of records)******************************** */
-        static ByteCount page_size;
-        static ByteCount cache_size; 
-        static ByteCount ram_size;   
+        static uint page_size;
+        static uint cache_size; 
+        static uint ram_size;   
         // static ByteCount disk_size;  // INF
         // static ByteCount disk_page_size;
         // static ByteCount ram_page_size;
