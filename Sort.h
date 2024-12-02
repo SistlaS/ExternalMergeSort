@@ -30,7 +30,7 @@ class SortIterator : public Iterator {
 
     // file operations
     bool writeDataIntoFile(string fileName, string data, int mode, string delimiter);
-    bool copyFileContents(string sourceFileName, string destinationFileName);
+    bool copyFileContents(string sourceFileName, string destinationFileName,int mode);
 
     void firstPass(bool isRAM);
     void mergeSort(bool isRAM);
@@ -44,7 +44,8 @@ class SortIterator : public Iterator {
     Iterator *const _input;
     RowCount _consumed, _produced;
 
-    vector<int> gdFactors; // first pass chunk sizes
+    vector<int> ram_gdFactors; // first pass chunk sizes
+    vector<int> disk_gdFactors;
     int numRAMRecords;
 
     
