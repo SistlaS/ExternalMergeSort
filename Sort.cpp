@@ -261,6 +261,7 @@ void SortIterator::firstPass(bool isRAM){
 
             record = "";
             v.clear();
+            int numQ = 0;
             
             for(int j=0;j<gd[i];j++){
                 queue<string> q;
@@ -272,6 +273,7 @@ void SortIterator::firstPass(bool isRAM){
                     }
                 }
                 v.push_back(q);
+                numQ++;
                 if(ip.eof()) break;
             }
 
@@ -282,7 +284,7 @@ void SortIterator::firstPass(bool isRAM){
             outFile.close();
 
             // Output: Sorted Cache.txt
-            Tree tree(F,v, toFile);
+            Tree tree(numQ,v, toFile);
             
             cout<<"Cache is sorted: \n";
             print_file_contents(toFile);
@@ -367,6 +369,7 @@ void SortIterator::mergeSort(bool isRAM){
         for(int i=0;i<gd2.size();i++){
 
             vector<queue<string>>v;
+            int numQ = 0;
             while(numRuns < gd2[i] && !input_file.eof()){
                 queue<string> q;
                 // '\n' delimits sorted runs
@@ -385,7 +388,8 @@ void SortIterator::mergeSort(bool isRAM){
                     }
                     cout<<endl;  
                 }
-                v.push_back(q);            
+                v.push_back(q); 
+                numQ++;           
             }
 
             // Clear toFile
@@ -393,7 +397,7 @@ void SortIterator::mergeSort(bool isRAM){
             outFile4.close();
             
             // Output: Sorted toFile
-            Tree tree(F,v,toFile);
+            Tree tree(numQ,v,toFile);
 
             cout<<"Sorted toFile: "<<toFile<<endl;
             print_file_contents(toFile);
