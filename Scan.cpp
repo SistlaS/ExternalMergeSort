@@ -85,6 +85,10 @@ int ScanIterator::generate_rand_int(int idx) {
 
 bool ScanIterator::generateData (char const * const fileName,int numRecords)
 {
+
+    ofstream outFile2(fileName, ios::trunc); // truncate file length to 0, effectively clearing it.
+    outFile2.close();
+
 	// write the record into Input.txt, which exists in Disk
 	ofstream file(fileName, ios::out); // overwrite mode
 
@@ -95,12 +99,15 @@ bool ScanIterator::generateData (char const * const fileName,int numRecords)
 
 	// generate `numRecords` number of input data with `column_count` number of columns, and store in file
 	for(int x=0;x<numRecords;x++){
-		string record;
-		for(int i=0;i<SystemConfigurations::column_count;i++){
-			int s = generate_rand_int(i);
-			record += to_string(s) + ",";
-		}
-		file << record << "\n";
+        // for(int j=0;j<SystemConfigurations::page_size;j++){
+            string record;
+            for(int i=0;i<SystemConfigurations::column_count;i++){
+                int s = generate_rand_int(i);
+                record += to_string(s) + ",";
+            }
+            file << record << "|";
+        // }
+		
 	}
 
 	file.close();
