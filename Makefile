@@ -91,4 +91,4 @@ count : list
 	@wc `cat list`
 
 clean :
-	@rm -f $(OBJS) ExternalMergeSort.exe ExternalMergeSort.exe.stackdump trace
+	@rm -f $(OBJS) RAM.txt RAM2.txt Disk.txt Disk2.txt Cache.txt ExternalMergeSort.exe ExternalMergeSort.exe.stackdump trace
