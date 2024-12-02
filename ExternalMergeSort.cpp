@@ -30,12 +30,12 @@ void read_user_inputs(int argc, char *argv[]) {
     int max_column_value = SystemConfigurations::default_max_value_in_column;
 
     cout << "Program usage:\nUser may provide two arguments: number of records(to be sorted) [with -n option] and maximum column value[with - max option]\n";
-    cout << "Program Behaviours:\n1.If you have not specified either or any of the required arguments, we assume default values of:\n \tNumber of records: " << num_records << " and\n\tMaximum column value: " + max_column_value << endl;
+    cout << "Program Behaviours:\n1.If you have not specified either or any of the required arguments, we assume default values of:\n \tNumber of records: " << num_records << " and\n\tMaximum column value: " << max_column_value << endl;
     cout << "2.Any errenous or unexpected argument is ignored and default value is considered.\n";
     cout << "3.The maximum and minimum values must be within the range of an int variable.\n";
 
     if(argc < 2){
-        cout<< "You have not specified any arguments - hence we take default values of:\n \tNumber of records: " << num_records << "and\n\tMaximum record value: " + max_column_value << endl;
+        cout<< "You have not specified any arguments - hence we take default values of:\n \tNumber of records: " << num_records << " and \n\tMaximum record value: " << max_column_value << endl;
     }
 
     for (int i = 1; i < argc; ++i) {
