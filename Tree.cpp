@@ -59,17 +59,6 @@ bool Node::is_greater(Node incoming){
 bool greater(int& offset, const std::vector<Node>& nodes) {
     
 
-    while (++offset < ROW_SIZE) {
-        if (nodes[0].getData(offset) != nodes[1].getData(offset)) {
-
-            return nodes[0].getData(offset) > nodes[1].getData(offset);
-        }
-    }
-    return false;
-}
-
-bool greater_from_offset(int& offset, const std::vector<Node>& nodes) {
-	
     while (offset < ROW_SIZE) {
         if (nodes[0].getData(offset) != nodes[1].getData(offset)) {
 
@@ -80,12 +69,24 @@ bool greater_from_offset(int& offset, const std::vector<Node>& nodes) {
     return false;
 }
 
+// bool greater_from_offset(int& offset, const std::vector<Node>& nodes) {
+	
+//     while (offset < ROW_SIZE) {
+//         if (nodes[0].getData(offset) != nodes[1].getData(offset)) {
+
+//             return nodes[0].getData(offset) > nodes[1].getData(offset);
+//         }
+//         offset++;
+//     }
+//     return false;
+// }
+
 bool Node::greater(Node& other, bool full_, vector<Node>& heap){
 	int offset;
 
 	bool isGreater;
 	if ((ovc == -1)|| (other.ovc == -1)){
-		offset = -1;
+		offset = 0;
 		isGreater = ::greater(offset, { *this, other });
 	}else{
 		if (ovc != other.ovc){
@@ -99,7 +100,7 @@ bool Node::greater(Node& other, bool full_, vector<Node>& heap){
 				cout<<"OVC is same"<<endl;
 			}
 			offset = ovc;
-			isGreater = ::greater_from_offset(offset, { *this, other });
+			isGreater = ::greater(offset, { *this, other });
 		}
 	}
 
