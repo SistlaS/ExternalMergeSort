@@ -3,6 +3,8 @@
 int ROW_SIZE = 4;
 int BUFFER_SIZE = 16;
 
+// bool DEBUG = false;
+
 
 vector<int> convertToInt(const string& str) {
     vector<int> result;
@@ -57,17 +59,6 @@ bool Node::is_greater(Node incoming){
 bool greater(int& offset, const std::vector<Node>& nodes) {
     
 
-    while (++offset < ROW_SIZE) {
-        if (nodes[0].getData(offset) != nodes[1].getData(offset)) {
-
-            return nodes[0].getData(offset) > nodes[1].getData(offset);
-        }
-    }
-    return false;
-}
-
-bool greater_from_offset(int& offset, const std::vector<Node>& nodes) {
-	
     while (offset < ROW_SIZE) {
         if (nodes[0].getData(offset) != nodes[1].getData(offset)) {
 
@@ -78,22 +69,38 @@ bool greater_from_offset(int& offset, const std::vector<Node>& nodes) {
     return false;
 }
 
+// bool greater_from_offset(int& offset, const std::vector<Node>& nodes) {
+	
+//     while (offset < ROW_SIZE) {
+//         if (nodes[0].getData(offset) != nodes[1].getData(offset)) {
+
+//             return nodes[0].getData(offset) > nodes[1].getData(offset);
+//         }
+//         offset++;
+//     }
+//     return false;
+// }
+
 bool Node::greater(Node& other, bool full_, vector<Node>& heap){
 	int offset;
 
 	bool isGreater;
 	if ((ovc == -1)|| (other.ovc == -1)){
-		offset = -1;
+		offset = 0;
 		isGreater = ::greater(offset, { *this, other });
 	}else{
 		if (ovc != other.ovc){
-			cout<<"Direct comparison using ovc"<<ovc<<" -- "<<other.ovc<<" ;; res = "<< (ovc <other.ovc)<<endl;
+			if (DEBUG){
+				cout<<"Direct comparison using ovc"<<ovc<<" -- "<<other.ovc<<" ;; res = "<< (ovc <other.ovc)<<endl;	
+			}
         	return ovc < other.ovc;  // Compare OVC directly if they differ
 		}else{
 			//do row comparison
-			cout<<"OVC is same"<<endl;
+			if (DEBUG){
+				cout<<"OVC is same"<<endl;
+			}
 			offset = ovc;
-			isGreater = ::greater_from_offset(offset, { *this, other });
+			isGreater = ::greater(offset, { *this, other });
 		}
 	}
 
@@ -111,22 +118,15 @@ bool Node::greater(Node& other, bool full_, vector<Node>& heap){
     // bool const isGreater = ::greater(offset, { *this, other });
 
     Node& loser = (isGreater ? *this : other);
-    cout<<"Loser node in ovc comparison -- ";
-    loser.printNode();
-
-	cout<<"Setting ovc for "<<loser.getIndex()<<","<<offset<<endl;
+    if (DEBUG){
+    	cout<<"Loser node in ovc comparison -- ";
+    	loser.printNode();
+		cout<<"Setting ovc for "<<loser.getIndex()<<","<<offset<<endl;
+    }
+    
     loser.setOvc(offset);
 	heap[loser.getIndex()].setOvc(offset);
     
-    // if (loser.getData(0) != INT_MAX){
-    // 	loser.printNode();
-
-    // 	cout<<"Setting ovc for "<<loser.getIndex()<<","<<offset<<endl;
-	//     loser.setOvc(offset);
-    // 	heap[loser.getIndex()].setOvc(offset);
-    // }
-
-    //set ovc in the leaf node too ?
     return isGreater;
 }
 
@@ -222,7 +222,7 @@ void Tree::construct_tree(){
 			parent_indx = parent_index(parent_indx);
 		}
 	}
-	print_tree();
+	if(DEBUG) print_tree();
 }
 
 bool Tree::is_empty(){
@@ -273,10 +273,13 @@ Node Tree::pop_winner() {
             heap[parent_indx] = current;
             break;
         }
-        cout<<"current ind : ";
-        current.printNode();
-        cout<<"parent ind : ";
-        heap[parent_indx].printNode();
+        if (DEBUG){
+        	cout<<"current ind : ";
+	        current.printNode();
+	        cout<<"parent ind : ";
+	        heap[parent_indx].printNode();
+        }
+        
         bool ovc_comp = current.greater(heap[parent_indx], false, heap);
         bool act_comp = current.is_greater(heap[parent_indx]);
 
@@ -329,7 +332,7 @@ void Tree::generate_runs(){
     	Node temp = pop_winner();
     	cout<<"popping :";
     	temp.printNode();
-    	print_tree();
+    	// print_tree();
     	cout<<"----------------------------"<<endl;
     	opBuffer.push_back(temp.getDataStr());
     	if(opBuffer.size()==BUFFER_SIZE){ 
@@ -368,6 +371,7 @@ int main(int argc, char const *argv[])
 
     queue<string> q5;
     q5.push("6,1,10,3,");
+    q5.push("6,1,10,8,");
     input.push_back(q5);
     // queue<string> q1;
     // q1.push("2, 4, 3, 0");
