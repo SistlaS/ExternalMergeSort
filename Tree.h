@@ -9,7 +9,7 @@
 
 typedef unsigned int uint;
 using namespace std;
-#define DEBUG false;
+bool DEBUG = false;
 
 
 class Node{
