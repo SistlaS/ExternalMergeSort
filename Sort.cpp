@@ -386,10 +386,11 @@ void SortIterator::mergeSort(bool isRAM){
                         cout<<record<<" ";
                         numRuns++;
                     }
+		    v.push_back(q); 
+	            numQ++; 
                     cout<<endl;  
                 }
-                v.push_back(q); 
-                numQ++;           
+                          
             }
 
             // Clear toFile
