@@ -7,6 +7,8 @@
 
 using namespace std;
 
+Config config;
+
 /* ***********************ScanPlan****************************** */
 ScanPlan::ScanPlan (char const * const name, RowCount const count)
 	: Plan (name), _count (count)
@@ -30,7 +32,7 @@ int ScanIterator::generate_rand_int() {
 	// Mersenne twister - seeding it with a random number
 	mt19937 generator(rand());
 
-	uniform_int_distribution<int> distribution(0,Config::max_val_column);
+	uniform_int_distribution<int> distribution(0,config.getMaxValColumn());
 	return distribution(generator);
 }
 
@@ -62,7 +64,7 @@ bool ScanIterator::next (Row & row)
 
     // generate `numRecords` number of input data with `column_count` number of columns, and store in file
     string record;
-    for(int i=0;i<Config::column_count;i++){
+    for(int i=0;i<config.getColumnCount();i++){
         int s = generate_rand_int();
         record += to_string(s) + ",";
     }
