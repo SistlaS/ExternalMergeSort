@@ -182,12 +182,6 @@ void SortIterator::spillBufferToDisk(){
 }
 
 void SortIterator::insertCacheRunsInRAM(string cacheRun){
-    // Open RAM.txt
-    fstream ram_file(cache, ios::in | ios::out);
-    if(!ram_file.is_open()){
-        cerr<<"Issue with opening RAM.txt, exit\n";
-        exit(1);
-    }
 
     // if we have enough records in RAM.txt OR if its the last batch of records
     if(_ramUsed == Config::ram_capacity){
@@ -195,11 +189,11 @@ void SortIterator::insertCacheRunsInRAM(string cacheRun){
             spillBufferToDisk();
 
             // clear the buffer
-            fstream ram_buffer_file(ram_buffer, ios::trunc);
+            ofstream ram_buffer_file(ram_buffer, ios::trunc);
             ram_buffer_file.close();
             _ramBufferUsed=0;
         } 
-        fstream ram_buffer_file(ram_buffer, ios::in | ios::out);
+        ofstream ram_buffer_file(ram_buffer, ios::out);
         if(!ram_buffer_file.is_open()){
             cerr<<"Issue with opening RAM_buffer.txt, exit\n";
             exit(1);
@@ -210,6 +204,13 @@ void SortIterator::insertCacheRunsInRAM(string cacheRun){
         // close the file
         ram_buffer_file.close();
         _ramBufferUsed++;
+    }
+
+    // Open RAM.txt
+    ofstream ram_file(cache, ios::out);
+    if(!ram_file.is_open()){
+        cerr<<"Issue with opening RAM.txt, exit\n";
+        exit(1);
     }
 
     // add run to RAM.txt
