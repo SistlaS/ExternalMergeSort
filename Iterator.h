@@ -23,11 +23,9 @@ public:
 
     void setRow(const string& newRow)  {
         row = newRow;
-        cout<<"\nRow set: " << row <<endl;
     }
     
     void clear(){
-        cout<<"\nRow cleared: " << row <<endl;
         row.clear();
     }
 private:
