@@ -151,7 +151,7 @@ void SortIterator::free (Row & row)
 	TRACE (true);
 } // SortIterator::free
 
-
+// performs external merge sort on cache size runs. Generates RAM-sized runs and
 void ramMergeSort(int W){
     // TODO: beautify the logic/ remove this wall of text
     // read K= num_ram_TT_leaf_nodes runs from RAM, and perform merge sort on that
@@ -160,12 +160,10 @@ void ramMergeSort(int W){
     // once RAM3 has 1024 records, write it into Disk2.txt
     // clear the file after processing completes
 
-    // if the number of runs in the RAM will be less than its capacity (64 bytes), pass the number of runs in function argument
+    // if the number of runs in the RAM will be less than its capacity (64 cache runs), pass the number of runs in function argument
     int numCacheRuns = W==0? Config::ram_capacity/Config::cache_tt_buffer_size : W;
-    cout<<"Number of cache sized runs: "<<numCacheRuns<<endl;
+
     vector<int> gdFactors = computeGracefulDegradationFactors(numCacheRuns,Config::num_ram_TT_leaf_nodes); 
-    // cout<<"GD Factors are: \n";
-    // for(auto x:gdFactors){cout<<x<<" ";} cout<<endl;
     vector<queue<string>>ram_tt_input; 
 
     int numRuns = gdFactors.size();
@@ -178,39 +176,28 @@ void ramMergeSort(int W){
             cout << "Error: Could not open ifstream file " << ram << endl;
             exit(1);
         }
-
         numRuns = gdFactors.size();
-        for(int i=0;i<numRuns;i++){
-            // cout<<"Populating RAM TT Input\n";
-            while(ram_tt_input.size()< gdFactors[i] && !inFile.eof()){
-                // cout<<"Number of queues: " << ram_tt_input.size()<<endl;
-                // cout<<"GDFactor value: "<<gdFactors[i]<<endl;
 
+        for(int i=0;i<numRuns;i++){
+            while(ram_tt_input.size()< gdFactors[i] && !inFile.eof()){
                 string run;
                 // run is delimited by newline character
-                // cout<<"Process run\n";
                 while(getline(inFile,run,'\n')){
                     // break the run into records and push the run into a queue
-
-                    // cout<<"Run value: "<<run<<"..."<<endl;
                     std::stringstream ss(run);
                     string record;
                     queue<string> q;
                     while(getline(ss,record,'|')){
                         q.push(record);
                     }
-                    // cout<<"Size before push: "<<ram_tt_input.size()<<endl;
                     ram_tt_input.push_back(q);
-                    // cout<<"Size after push: "<<ram_tt_input.size()<<endl;
 
                 }
-                // cout<<"Prcess run complete\n";
             }
             inFile.close();
             // TODO: call the RAM TT
 
             // TODO: REMOVE IT - THIS IS JUST FOR SIMULATING W/O TT - mocking its output
-            cout<<"Processing complete of 1 RAM Run\n";
             copyFileContents(ram,sorted_ram_output,1);
             // TT will flush its output into RAM3.txt
             ram_tt_input.clear();
