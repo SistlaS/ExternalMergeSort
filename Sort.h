@@ -19,8 +19,11 @@ public:
 	~SortIterator ();
 	bool next (Row & row);
 	void free (Row & row);
+    void generateCacheRuns(Row row, bool lastBatch);
+    void insertCacheRunsInRAM(string cacheRun);
 private:
 	SortPlan const * const _plan;
 	Iterator * const _input;
-	RowCount _consumed, _produced;
+	RowCount _consumed, _produced,_cacheUsed,_ramUsed, _ramBufferUsed;
+    bool isLastBatch = false;
 }; // class SortIterator

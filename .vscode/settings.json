@@ -149,6 +149,7 @@
         "cinttypes": "cpp",
         "filesystem": "cpp",
         "list": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "queue": "cpp"
     },
 }
