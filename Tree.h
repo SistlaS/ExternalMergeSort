@@ -51,15 +51,16 @@ class Tree{
 		uint capacity;
 		uint leaf_nodes;
 		vector<Node> heap;
+		//change this to pointer
 		vector<queue<string>> input;
 		vector<string> opBuffer;
 		string opFilename;
 
-		Tree(uint capacity, vector<queue<string>> input, string opFilename);
+		Tree(uint capacity, string opFilename);
 
 		void construct_tree();
 		Node pop_winner();
-		void generate_runs();
+		void generate_runs(vector<queue<string>> input);
 		void flush_to_op(bool eof);
 
 		//utility funcs

@@ -1,4 +1,5 @@
 #include "Tree.h"
+#include <cassert>
 
 int ROW_SIZE = Config::column_count;
 int BUFFER_SIZE = Config::cache_tt_buffer_size;
@@ -91,7 +92,7 @@ bool Node::greater(Node& other, bool full_, vector<Node>& heap){
 //for internal sort this is assumed to be equal to the leaf size for simplicity
 //for merging no.of leaves = capacity/2
 
-Tree::Tree(uint k, vector<queue<string>> input, string opFilename){
+Tree::Tree(uint k, string opFilename){
     //the next power of 2 for capacity
     uint nextPowerOf2 = 1;
     while (nextPowerOf2 < 2 * k) {
@@ -102,10 +103,7 @@ Tree::Tree(uint k, vector<queue<string>> input, string opFilename){
     this->heap = std::vector<Node>(this->capacity);
     this->leaf_nodes = this->capacity/2;
     this->opFilename = opFilename;
-    this->input = input;
 
-    construct_tree();
-    generate_runs();
 }
 
 Tree::~Tree() {}
@@ -141,6 +139,7 @@ void Tree::construct_tree(){
 		cout<<"number of records to be sorted is larger than the number of nodes"<<endl;
 		return;
 	}
+    //push empty queues if there are empty leaf nodes
 	if (input_size < leaf_nodes){
 		int diff = leaf_nodes - input_size;
 		for(int i = 0;i <diff;i ++){
@@ -162,6 +161,7 @@ void Tree::construct_tree(){
         heap[index] = temp;
     }
 
+    //populate the internal nodes
     for (int i = leaf_nodes; i < capacity; i++){
 
 		Node current = heap[i];
@@ -213,7 +213,6 @@ Node Tree::pop_winner() {
         new_rec = Node(rec, winner_index);
         input[ip_queue_no].pop();
     }
-    // new_rec.printNode();
     heap[winner_index] = new_rec;
 
     // Start the propagation from the winner's index
@@ -272,7 +271,9 @@ void Tree::flush_to_op(bool eof){
     opBuffer.clear();
 }
 
-void Tree::generate_runs(){
+void Tree::generate_runs(vector<queue<string>> input){
+    this->input = input;
+    construct_tree();
 	while(!is_empty()){
     	Node temp = pop_winner();
     	cout<<"popping :";
@@ -287,3 +288,44 @@ void Tree::generate_runs(){
     flush_to_op(true);
 
 }
+// int main(int argc, char const *argv[])
+// {
+
+//     vector<queue<string>> input;
+//     queue<string> q1;
+//     q1.push("2, 4, 3, 0");
+//     q1.push("3, 0, 1, 3");
+//     q1.push("5, 5, 3, 4");
+//     input.push_back(q1);
+
+//     queue<string> q2;
+//     q2.push("2, 2, 0, 1");
+//     q2.push("2, 4, 4, 5");
+//     q2.push("4, 4, 8, 9");
+//     input.push_back(q2);
+
+//     queue<string> q3;
+//     q3.push("4, 5, 0, 6");
+//     q3.push("9, 8, 8, 6");
+//     input.push_back(q3);
+
+//     queue<string> q4;
+//     q4.push("5,0,0,0,");
+//     q4.push("5,0,3,0,");
+//     input.push_back(q4);
+
+//     queue<string> q5;
+//     q5.push("6,1,10,3,");
+//     q5.push("6,1,10,8,");
+//     input.push_back(q5);
+//     uint n = 5;
+//     string outputFilename = "output.txt";
+
+//     Tree tree(n, outputFilename);
+//     tree.generate_runs(input);
+//     // Construct the tree
+//     // tree.construct_tree();
+    
+//     tree.print_tree();
+//     return 0;
+// }
