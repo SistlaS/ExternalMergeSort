@@ -16,11 +16,10 @@ string sorted_ram_output = "RAM3.txt"; // storing the output of the RAM TT in th
 string disk = "Disk.txt";   // Store the final sorted output here
 string temp_disk = "Disk2.txt"; // Store the spilled cache-size runs in a temp file in disk
 
-// TODO: Change the constructor signature
 // init Cache TT
-// Tree cache_tt(Config::num_cache_TT_leaf_nodes,{},ram);
+Tree cache_tt(Config::num_cache_TT_leaf_nodes,"");
 // init RAM TT
-// Tree ram_tt(Config::num_ram_TT_leaf_nodes,{},disk);
+Tree ram_tt(Config::num_ram_TT_leaf_nodes,sorted_ram_output);
 
 
 /* File management functions */
@@ -195,10 +194,11 @@ void ramMergeSort(int W){
                 }
             }
             inFile.close();
-            // TODO: call the RAM TT
+
+            ram_tt.generate_runs(ram_tt_input);
 
             // TODO: REMOVE IT - THIS IS JUST FOR SIMULATING W/O TT - mocking its output
-            copyFileContents(ram,sorted_ram_output,1);
+            // copyFileContents(ram,sorted_ram_output,1);
             // TT will flush its output into RAM3.txt
             ram_tt_input.clear();
 
@@ -308,24 +308,23 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
             exit(1);
         }
 
-        string cacheRun; // TODO: Remove; added for simulation
+        // string cacheRun; // TODO: Remove; added for simulation
 
         while(getline(inFile,record,'|')){
             record += "|"; // re-adding the delimiter
             q.push(record); // queue of size 1 for the cache runs
-            cacheRun+=record;
+            // cacheRun+=record;
             tt_input.push_back(q);
 
             q.pop(); // clear the queue and reuse
         }
 
-        // TODO: REMOVE IT - THIS IS JUST FOR SIMULATING W/O TT - mocking its output
-        cacheRun+="\n";
-        insertCacheRunsInRAM(cacheRun);
-        cacheRun.clear();
+        // // TODO: REMOVE IT - THIS IS JUST FOR SIMULATING W/O TT - mocking its output
+        // cacheRun+="\n";
+        // insertCacheRunsInRAM(cacheRun);
+        // cacheRun.clear();
         
-        // TODO: call the cache TT
-        // cache_tt.generate_runs(tt_input);
+        cache_tt.generate_runs(tt_input);
         
         
         tt_input.clear();
