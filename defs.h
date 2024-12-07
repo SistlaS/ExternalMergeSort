@@ -65,9 +65,9 @@ public:
     // Sizes of memory units (all in # of records)
     static const RowCount page_size = 4;
     static const RowCount cache_tt_buffer_size = 16; // Cache buffer size = Cache TT Fan-in, 16 records = 4 pages
-    static const RowCount ram_tt_buffer_size = 128; // RAM buffer size = RAM TT Fan-in, 128 records = 32 pages
+    static const RowCount ram_tt_buffer_size = 32; // RAM buffer size = RAM TT Fan-in, 128 records = 32 pages
     static const RowCount num_cache_TT_leaf_nodes = 16; 
-    static const RowCount num_ram_TT_leaf_nodes = 128; 
+    static const RowCount num_ram_TT_leaf_nodes = 32; 
     static const RowCount ram_capacity = 1024;  // Capacity of the RAM.txt = 1024 records => 64 cache size runs => 256 pages 
     static const RowCount ram_buffer_capacity = 32; // Capacity of the RAM buffer = 32 records => 2 cache size runs => 8 pages
 }; // class Config

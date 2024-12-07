@@ -22,6 +22,8 @@ public:
     void generateCacheRuns(Row row, bool lastBatch);
     void insertCacheRunsInRAM(string cacheRun);
     void spillBufferToDisk();
+    void ramExternalSort();
+    void diskExternalSort();
 private:
 	SortPlan const * const _plan;
 	Iterator * const _input;
