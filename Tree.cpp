@@ -46,6 +46,7 @@ void Node::printNode() {
 bool Node::is_greater(Node incoming){
 	vector<int> incoming_data = incoming.getData();
 	for (int i = 0; i<ROW_SIZE; i++){
+		cout<<Data[i]<< " --- "<< incoming_data[i]<<endl;
 		if (Data[i] > incoming_data[i]){
 			return true;
 		}else if (Data[i] < incoming_data[i]){
@@ -134,7 +135,7 @@ bool Node::greater(Node& other, bool full_, vector<Node>& heap){
 //for internal sort this is assumed to be equal to the leaf size for simplicity
 //for merging no.of leaves = capacity/2
 
-Tree::Tree(uint k, vector<queue<string>> input, string opFilename){
+Tree::Tree(uint k, string opFilename){
     //the next power of 2 for capacity
     uint nextPowerOf2 = 1;
     while (nextPowerOf2 < 2 * k) {
@@ -145,10 +146,6 @@ Tree::Tree(uint k, vector<queue<string>> input, string opFilename){
     this->heap = std::vector<Node>(this->capacity);
     this->leaf_nodes = this->capacity/2;
     this->opFilename = opFilename;
-    this->input = input;
-
-    construct_tree();
-    generate_runs();
 }
 
 Tree::~Tree() {}
@@ -282,7 +279,7 @@ Node Tree::pop_winner() {
         
         bool ovc_comp = current.greater(heap[parent_indx], false, heap);
         bool act_comp = current.is_greater(heap[parent_indx]);
-
+        cout<<ovc_comp<<"<- ovc-----act ->"<<act_comp<<endl;
         assert(ovc_comp == act_comp && "OVC comparison is different from row wise comparison");
         if (ovc_comp) {
             // Current becomes the new loser, propagate the winner
@@ -326,13 +323,16 @@ void Tree::flush_to_op(bool eof){
     opBuffer.clear();
 }
 
-void Tree::generate_runs(){
+
+void Tree::generate_runs(vector<queue<string>> input){
+	this->input = input;
+	construct_tree();
 	cout<<"******** Starting runs ********"<<endl;
 	while(!is_empty()){
     	Node temp = pop_winner();
     	cout<<"popping :";
     	temp.printNode();
-    	// print_tree();
+    	print_tree();
     	cout<<"----------------------------"<<endl;
     	opBuffer.push_back(temp.getDataStr());
     	if(opBuffer.size()==BUFFER_SIZE){ 
@@ -348,31 +348,38 @@ int main(int argc, char const *argv[])
 
     vector<queue<string>> input;
     queue<string> q1;
-    q1.push("2, 4, 3, 0");
-    q1.push("3, 0, 1, 3");
-    q1.push("5, 5, 3, 4");
+    q1.push("6, 10, 1, 7");
     input.push_back(q1);
 
     queue<string> q2;
-    q2.push("2, 2, 0, 1");
-    q2.push("2, 4, 4, 5");
-    q2.push("4, 4, 8, 9");
+    q2.push("6, 4, 9, 6");
     input.push_back(q2);
+    // queue<string> q1;
+    // q1.push("2, 4, 3, 0");
+    // q1.push("3, 0, 1, 3");
+    // q1.push("5, 5, 3, 4");
+    // input.push_back(q1);
 
-    queue<string> q3;
-    q3.push("4, 5, 0, 6");
-    q3.push("9, 8, 8, 6");
-    input.push_back(q3);
+    // queue<string> q2;
+    // q2.push("2, 2, 0, 1");
+    // q2.push("2, 4, 4, 5");
+    // q2.push("4, 4, 8, 9");
+    // input.push_back(q2);
 
-    queue<string> q4;
-    q4.push("5,0,0,0,");
-    q4.push("5,0,3,0,");
-    input.push_back(q4);
+    // queue<string> q3;
+    // q3.push("4, 5, 0, 6");
+    // q3.push("9, 8, 8, 6");
+    // input.push_back(q3);
 
-    queue<string> q5;
-    q5.push("6,1,10,3,");
-    q5.push("6,1,10,8,");
-    input.push_back(q5);
+    // queue<string> q4;
+    // q4.push("5,0,0,0,");
+    // q4.push("5,0,3,0,");
+    // input.push_back(q4);
+
+    // queue<string> q5;
+    // q5.push("6,1,10,3,");
+    // q5.push("6,1,10,8,");
+    // input.push_back(q5);
     // queue<string> q1;
     // q1.push("2, 4, 3, 0");
     // q1.push("2, 4, 3, 8");
@@ -386,15 +393,15 @@ int main(int argc, char const *argv[])
     // input.push_back(q2);
 
     // Test: Tree with a specific capacity
-    uint n = 5;
+    uint n = 2;
     string outputFilename = "output.txt";
 
-    Tree tree(n, input, outputFilename);
+    Tree tree(n, outputFilename);
     // Construct the tree
     // tree.construct_tree();
     
     tree.print_tree();
-    // tree.generate_runs();
+    tree.generate_runs(input);
 
 	// uint n = 7;
     // Tree tree(n);
