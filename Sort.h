@@ -27,6 +27,6 @@ public:
 private:
 	SortPlan const * const _plan;
 	Iterator * const _input;
-	RowCount _consumed, _produced,_cacheUsed,_ramUsed, _ramBufferUsed;
+	RowCount _consumed, _produced,_cacheUsed,_ramUsed, _ramBufferUsed, _numRAMRuns;
     bool isLastBatch = false;
 }; // class SortIterator

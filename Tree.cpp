@@ -1,7 +1,7 @@
 #include "Tree.h"
 
-int ROW_SIZE = 4;
-int BUFFER_SIZE = 16;
+int ROW_SIZE = Config::column_count;
+int BUFFER_SIZE = Config::cache_tt_buffer_size;
 
 
 vector<int> convertToInt(const string& str) {

@@ -16,7 +16,7 @@ string sorted_ram_output = "RAM3.txt"; // storing the output of the RAM TT in th
 string disk = "Disk.txt";   // Store the final sorted output here
 string temp_disk = "Disk2.txt"; // Store the spilled cache-size runs in a temp file in disk
 
-// TODO: Placeholder inits
+// TODO: Change the constructor signature
 // init Cache TT
 // Tree cache_tt(Config::num_cache_TT_leaf_nodes,{},ram);
 // init RAM TT
@@ -213,7 +213,8 @@ void ramMergeSort(int W){
 
 void SortIterator::ramExternalSort(){
     // sort the RAM.txt currently in memory
-    ramMergeSort(0); 
+    ramMergeSort(0);
+    _numRAMRuns++; 
     
     // read the temp_disk, and write 64 runs into RAM. repeat till temp_disk is read fully, then clear it
     int maxCacheRunsInRAM = Config::ram_capacity / (Config::cache_tt_buffer_size);
@@ -221,7 +222,7 @@ void SortIterator::ramExternalSort(){
 
     // First process the runs in the buffer - place them into the RAM.txt
     copyFileContents(ram_buffer,ram,1);
-    runCount += (Config::ram_buffer_capacity / Config::cache_tt_buffer_size);
+    runCount += (_ramBufferUsed / Config::cache_tt_buffer_size);
     clearFile(ram_buffer);
 
     ifstream inFile(temp_disk);
@@ -232,8 +233,8 @@ void SortIterator::ramExternalSort(){
 
     ofstream outFile(ram, ios::out);
     if (!outFile) {
-    cout << "Error: Could not open file " << ram << endl;
-    exit(1);
+        cout << "Error: Could not open file " << ram << endl;
+        exit(1);
     }
 
     string run;
@@ -243,20 +244,22 @@ void SortIterator::ramExternalSort(){
         if(runCount == maxCacheRunsInRAM){
             outFile.close(); // since we are opening a ifstream to RAM.txt in ramMergeSort(), closing this ofstream
             ramMergeSort(0);
+            _numRAMRuns++;
 
             runCount=0;
             ofstream outFile(ram,ios::out); // back in business
+            if (!outFile) {
+                cout << "Error: Could not open file " << ram << endl;
+                exit(1);
+            }
         }
     }
-
 
     if(runCount != 0){
         outFile.close();
         ramMergeSort(runCount);
-    }
-    
-
-
+        _numRAMRuns++;
+    } 
 }
 
 void SortIterator::generateCacheRuns(Row row, bool lastBatch){
@@ -350,4 +353,8 @@ void SortIterator::insertCacheRunsInRAM(string cacheRun){
     // close the file
     ram_file.close();
     ++ _ramUsed;
+}
+
+void SortIterator::diskExternalSort(){
+
 }

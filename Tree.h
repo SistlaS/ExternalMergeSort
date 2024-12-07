@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include <queue>
+#include "defs.h"
 
 
 typedef unsigned int uint;
