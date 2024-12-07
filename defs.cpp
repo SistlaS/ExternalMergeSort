@@ -19,8 +19,8 @@ Trace::~Trace ()
 
 void Trace::_trace (char const lead [])
 {
-	if (_output)
-		printf ("%s %s (%s:%d)\n", lead, _function, _file, _line);
+	if (_output){}
+		// printf ("%s %s (%s:%d)\n", lead, _function, _file, _line);
 } // Trace::_trace
 
 // -----------------------------------------------------------------

@@ -70,9 +70,7 @@ bool ScanIterator::next (Row & row)
     }
     record += "|";
 
-    row.setRow(record);
-    cout<<"Printing row: " << row.getRow() <<" \n";
-    
+    row.setRow(record);    
 	++ _count;
 
 	return true;

@@ -53,4 +53,4 @@ co :
 	co $(REV) -l $(HDRS) $(SRCS) $(DOCS) $(SCRS)
 
 clean :
-	@rm -f $(OBJS) Test.exe Test.exe.stackdump trace
+	@rm -f $(OBJS) Cache.txt RAM.txt RAM2.txt RAM3.txt Disk.txt Disk2.txt Test.exe Test.exe.stackdump trace
