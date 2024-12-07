@@ -180,7 +180,7 @@ void ramMergeSort(int W){
                 cout<<"GDFactor value: "<<gdFactors[i]<<endl;
                 // Open RAM.txt in input mode
                 ifstream inFile(ram,ios::in);
-                if (!inFile) {
+                if (!inFile or !inFile.is_open()) {
                     cout << "Error: Could not open ifstream file " << ram << endl;
                     exit(1);
                 }
@@ -200,7 +200,11 @@ void ramMergeSort(int W){
                     ram_tt_input.push_back(q);
                 }
                 cout<<"Process run complete\n";
-
+                if (inFile.eof()) {
+                    std::cout << "Finished reading file." << std::endl;
+                    inFile.close();
+                    break;
+                } 
                 inFile.close();
             }
             // TODO: call the RAM TT
@@ -272,7 +276,7 @@ void SortIterator::ramExternalSort(){
             cacheRunCount++;
             //
             if(cacheRunCount == maxCacheRunsInRAM){
-                // outFile.close(); // since we are opening a ifstream to RAM.txt in ramMergeSort(), closing this ofstream
+                outFile.close(); // since we are opening a ifstream to RAM.txt in ramMergeSort(), closing this ofstream
                 cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
                 ramMergeSort(0);
                 _numRAMRuns++;
