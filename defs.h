@@ -57,49 +57,19 @@ private :
 
 class Config {
 public:
-    static int getMaxValColumn() {
-        return max_val_column;
-    }
 
-    static int getColumnCount() {
-        return column_count;
-    }
-
-    static int getRecordSize() {
-        return record_size;
-    }
-
-    static RowCount getPageSize() {
-        return page_size;
-    }
-
-    static RowCount getCacheBufferSize() {
-        return cache_buffer_size;
-    }
-
-    static RowCount getRamBufferSize() {
-        return ram_buffer_size;
-    }
-
-    static RowCount getCacheSize() {
-        return cache_size;
-    }
-
-    static RowCount getRamSize() {
-        return ram_size;
-    }
-
-private:
     static const int max_val_column = 9; // Max value possible in a column of a record
     static const int column_count = 4;   // Number of columns in a record
-    static const int record_size = 16;   // Size of a record (in bytes)
+    // static const int record_size = 16;   // Size of a record (in bytes)
 
     // Sizes of memory units (all in # of records)
     static const RowCount page_size = 4;
-    static const RowCount cache_buffer_size = 2;
-    static const RowCount ram_buffer_size = 4;
-    static const RowCount cache_size = 4; // Total cache size = TT size + cache.txt + cache_output_buffer
-    static const RowCount ram_size = 10;  // Total ram size = TT size + ram.txt + ram_output_buffer
+    static const RowCount cache_tt_buffer_size = 2;
+    static const RowCount ram_tt_buffer_size = 4;
+    static const RowCount num_cache_TT_leaf_nodes = 4; // Total cache size = TT size + cache.txt + cache_output_buffer
+    static const RowCount num_ram_TT_leaf_nodes = 10;  // Total ram size = TT size + ram.txt + ram_output_buffer
+    static const RowCount ram_capacity = 10;
+    static const RowCount ram_buffer_capacity = 10;
 }; // class Config
 
 
