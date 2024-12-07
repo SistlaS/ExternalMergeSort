@@ -118,13 +118,6 @@ bool copyFileContents(string sourceFileName, string destinationFileName, int mod
 
 void SortIterator::generateCacheRuns(Row row, bool lastBatch){
 
-    // Open Cache.txt
-    fstream cache_file(cache, ios::in | ios::out);
-    if(!cache_file.is_open()){
-        cerr<<"Issue with opening Cache.txt, exit\n";
-        exit(1);
-    }
-
     // if we have enough records in Cache.txt OR if its the last batch of records, generate the cache runs
     if(_cacheUsed == Config::num_cache_TT_leaf_nodes or lastBatch){
         // pull all records into string by tokens
@@ -133,7 +126,14 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
         vector<queue<string>> tt_input;
         queue<string> q;
 
-        while(getline(cache_file,record,'|')){
+        // Open the source file in input mode
+        ifstream inFile(cache);
+        if (!inFile) {
+            cout << "Error: Could not open file " << cache << endl;
+            exit(1);
+        }
+
+        while(getline(inFile,record,'|')){
             record += "|"; // re-adding the delimiter
             q.push(record); // queue of size 1 for the cache runs
             tt_input.push_back(q);
@@ -143,18 +143,31 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
 
         // call the cache TT
         // cache_tt.generate_runs(tt_input);
+        tt_input.clear();
 
         // clear the cache file
-        cache_file.close(); // Close the file first
-        cache_file.open(cache, ios::out | ios::trunc); // Truncate the file
-        if (!cache_file.is_open()) {
+        inFile.close(); // Close ifstream first
+
+        // Clear file
+        ofstream outFile(cache, ios::trunc);
+        if (!outFile.is_open()) {
             cerr << "Failed to clear the file!" << endl;
             exit(1);
         }
+        outFile.close();
     }
 
     if(lastBatch) return;
-    cache_file << row.getRow();
+
+    // write record into cache
+    ofstream outfile(cache,ios::out);
+    if(!outfile.is_open()){
+        cerr<<"Issue with opening Cache.txt, exit\n";
+        exit(1);
+    }
+    outfile << row.getRow();
+    outfile.close();
+
     ++ _consumed;
     ++ _cacheUsed;
 }
@@ -193,7 +206,7 @@ void SortIterator::insertCacheRunsInRAM(string cacheRun){
         }
         // add record in buffer
         ram_buffer_file << cacheRun << "\n";
-        
+
         // close the file
         ram_buffer_file.close();
         _ramBufferUsed++;
