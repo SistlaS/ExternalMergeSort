@@ -10,8 +10,9 @@ using namespace std;
 
 string ram = "RAM.txt";
 string cache = "Cache.txt";
-string buf_ram = "RAM2.txt";
+string ram_buffer = "RAM2.txt";
 string disk = "Disk.txt";
+string temp_disk = "Disk2.txt";
 
 // TODO: Placeholder inits
 // init Cache TT
@@ -82,6 +83,39 @@ void SortIterator::free (Row & row)
 	TRACE (true);
 } // SortIterator::free
 
+
+bool copyFileContents(string sourceFileName, string destinationFileName, int mode){
+	// Open the source file in input mode
+    ifstream inFile(sourceFileName);
+    if (!inFile) {
+        cout << "Error: Could not open source file " << sourceFileName << endl;
+        return false;
+    }
+
+    // Open the destination file in output mode (will append if exists)
+    ofstream outFile;
+	if(mode==0){
+		outFile.open(destinationFileName, ios::out); // overwrite mode
+	}
+	else{
+		outFile.open(destinationFileName, ios::app); // append mode
+	}
+
+    if (!outFile) {
+        cout << "Error: Could not open destination file " << destinationFileName << endl;
+        return false;
+    }
+
+    // Copy content from source file to destination file
+    outFile << inFile.rdbuf();
+
+    // Close both files
+    inFile.close();
+    outFile.close();
+
+    return true;
+}
+
 void SortIterator::generateCacheRuns(Row row, bool lastBatch){
 
     // Open Cache.txt
@@ -125,6 +159,15 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
     ++ _cacheUsed;
 }
 
+// move RAM buffer contents into a temp file in Disk
+void SortIterator::spillBufferToDisk(){
+    bool isSortWriteSuccess = copyFileContents(ram_buffer, temp_disk,1);
+    if (!isSortWriteSuccess) {
+        cout << "Error: Could not copy the file " << ram_buffer << " into " << temp_disk << endl;
+        exit(1);
+    }
+}
+
 void SortIterator::insertCacheRunsInRAM(string cacheRun){
     // Open RAM.txt
     fstream ram_file(cache, ios::in | ios::out);
@@ -134,10 +177,32 @@ void SortIterator::insertCacheRunsInRAM(string cacheRun){
     }
 
     // if we have enough records in RAM.txt OR if its the last batch of records
-    if(_ramUsed == Config::num_ram_TT_leaf_nodes){
+    if(_ramUsed == Config::ram_capacity){
+        if(_ramBufferUsed == Config::ram_buffer_capacity){
+            spillBufferToDisk();
+
+            // clear the buffer
+            fstream ram_buffer_file(ram_buffer, ios::trunc);
+            ram_buffer_file.close();
+            _ramBufferUsed=0;
+        } 
+        fstream ram_buffer_file(ram_buffer, ios::in | ios::out);
+        if(!ram_buffer_file.is_open()){
+            cerr<<"Issue with opening RAM_buffer.txt, exit\n";
+            exit(1);
+        }
+        // add record in buffer
+        ram_buffer_file << cacheRun << "\n";
         
+        // close the file
+        ram_buffer_file.close();
+        _ramBufferUsed++;
     }
 
-    ram_file << cacheRun;
+    // add run to RAM.txt
+    ram_file << cacheRun << "\n";
+
+    // close the file
+    ram_file.close();
     ++ _ramUsed;
 }

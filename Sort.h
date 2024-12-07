@@ -21,6 +21,7 @@ public:
 	void free (Row & row);
     void generateCacheRuns(Row row, bool lastBatch);
     void insertCacheRunsInRAM(string cacheRun);
+    void spillBufferToDisk();
 private:
 	SortPlan const * const _plan;
 	Iterator * const _input;
