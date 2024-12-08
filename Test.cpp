@@ -7,13 +7,16 @@
 int main (int argc, char * argv [])
 {
 	TRACE (true);
+    int n;
+    cout<<"Enter the number of records: ";
+    cin>>n;
 
 	Plan * const plan =
 			new WitnessPlan ("output",
 				new SortPlan ("*** The main thing! ***",
 					new WitnessPlan ("input",
 						new FilterPlan ("half",
-							new ScanPlan ("source", 1000)
+							new ScanPlan ("source", n)
 						)
 					)
 				)

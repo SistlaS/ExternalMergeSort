@@ -342,8 +342,18 @@ void Tree::generate_runs(vector<queue<string>> input){
     this->input = input;
     cout<<"**********************Input size : "<<input.size()<<"******************"<<endl;
     // print_tree();
+   
 
     construct_tree();
+    if(input.size() == 3){
+        for(int i = 0; i < input.size();i ++)  {
+            queue<string> temp = input[i];
+            while(!temp.empty()){
+                cout<<temp.front()<<",";
+                temp.pop();
+            }
+        }  
+    }
 	while(!is_empty()){
     	Node temp = pop_winner();
     	cout<<"popping :";
@@ -354,7 +364,7 @@ void Tree::generate_runs(vector<queue<string>> input){
     	if(opBuffer.size()==BUFFER_SIZE){ 
             // cout<<"BEFORE FLUSHING_________"<<opBuffer.size()<<endl;
             if (isRam){
-                flush_to_op(false);
+            flush_to_op(false);
             }else{
                 flush_to_op(true);
             }
@@ -365,8 +375,11 @@ void Tree::generate_runs(vector<queue<string>> input){
     // Final flush to ensure all data is written
     // cout<<"BEFORE FLUSHING_________FIN"<<opBuffer.size()<<endl;
     if(!opBuffer.size()){
-        cout<<"_____________________________________HERE"<<endl;
+        cout<<"_____________________________________HERE"<<opBuffer.size()<<endl;
         flush_to_op(true);
+    // if(!opBuffer.size()){
+    //     cout<<"_____________________________________HERE"<<endl;
+    //     flush_to_op(true);
     }
     clear_heap();
     cout<<"*******************EOR**********************"<<endl;
