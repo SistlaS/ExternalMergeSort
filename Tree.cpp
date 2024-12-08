@@ -324,7 +324,9 @@ void Tree::flush_to_op(bool eof){
         for (size_t i = 0; i < opBuffer.size(); ++i) {
             opString += opBuffer[i] + "|";
         }
-        opString += '\n';
+        if(eof){
+            opString += '\n';
+        }
         // cout<<op
         insertCacheRunsInRAM(opString);
     }
@@ -338,20 +340,9 @@ void Tree::clear_heap(){
 void Tree::generate_runs(vector<queue<string>> input){
     // construct_tree();
     this->input = input;
-    // cout<<"/nInput size :"<<input.size()<<endl;
+    cout<<"**********************Input size : "<<input.size()<<"******************"<<endl;
     // print_tree();
 
-    // for(int i =0; i<input.size();i++){
-    //     queue<string> temp_q = input[i];
-    //     // cout<<"-------------------------"<<input[i].size();
-    //     while (!temp_q.empty())
-    //         {
-    //             string q_element = temp_q.front();
-    //             std::cout << q_element <<" ";
-    //             temp_q.pop();
-    //         } 
-    //     cout<<endl;
-    // }
     construct_tree();
 	while(!is_empty()){
     	Node temp = pop_winner();
@@ -367,9 +358,12 @@ void Tree::generate_runs(vector<queue<string>> input){
     }
     // opBuffer.push_back(string(1, '\n'));
     // Final flush to ensure all data is written
-    // cout<<"BEFORE FLUSHING_________"<<opBuffer.size()<<endl;
-    flush_to_op(true);
+    // cout<<"BEFORE FLUSHING_________FIN"<<opBuffer.size()<<endl;
+    if(opBuffer.size()){
+        flush_to_op(true);
+    }
     clear_heap();
+    cout<<"*******************EOR**********************"<<endl;
 }
 
 // int main(int argc, char const *argv[])
