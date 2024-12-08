@@ -29,7 +29,7 @@ class Node{
 	    //     : Data(data), Index(index), ovc(ovc) {}
 
 
-	    bool greater(Node& other, bool const full, vector<Node>& heap);
+	    bool greater(Node& other, bool const full, vector<Node>& heap, bool isCache, bool isRam);
 
 	    bool is_greater(Node incoming);
 
@@ -72,8 +72,6 @@ class Tree{
 		uint leftChild_index(uint);
 		uint rightChild_index(uint);
 		void print_tree();
-
-
 		~Tree();
 
 };
