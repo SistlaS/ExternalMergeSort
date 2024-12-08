@@ -122,7 +122,7 @@ SortIterator::SortIterator (SortPlan const * const plan) :
     }
 
     // sort into RAM-sized runs
-    ramExternalSort();
+    // ramExternalSort();
     // diskExternalSort();
 	
 	traceprintf ("%s consumed %lu rows\n",
@@ -180,20 +180,23 @@ void ramMergeSort(int W){
                 // run is delimited by newline character
                 while(getline(inFile,run,'\n')){
                     // break the run into records and push the run into a queue
+                    cout<<"Run is: "<<run<<endl;
+                    if(run.size()==0) break;
                     std::stringstream ss(run);
                     string record;
                     queue<string> q;
+                    int numRecords=0;
                     while(getline(ss,record,'|')){
                         q.push(record);
+                        numRecords++;
                     }
                     ram_tt_input.push_back(q);
+                    cout<<"Number of records in this run: "<<numRecords<<endl;
                 }
             }
             inFile.close();
             // TT will flush its output into RAM3.txt
             ram_tt.generate_runs(ram_tt_input);
-
-        
             ram_tt_input.clear();
             // clear RAM.txt
             clearFile(ram);
@@ -228,13 +231,13 @@ void SortIterator::ramExternalSort(){
     if(SortIterator::_ramBufferUsed!=0){
         copyFileContents(ram_buffer,ram,1);
         cacheRunCount += (SortIterator::_ramBufferUsed/Config::cache_tt_buffer_size);
-        // cout<<"Number of runs in the RAM buffer "<<cacheRunCount<<endl;
+        cout<<"Number of runs in the RAM buffer "<<cacheRunCount<<endl;
         clearFile(ram_buffer);
         SortIterator::_ramBufferUsed=0;
     }
 
     if(_bufferSpills!=0){
-        // cout<<"Number of buffer spills: "<<_bufferSpills<<endl;
+        cout<<"Number of buffer spills: "<<_bufferSpills<<endl;
         ifstream inFile(temp_disk,ios::in);
         if (!inFile) {
             cout << "Error: Could not open ifstream file " << temp_disk << endl;
@@ -255,7 +258,7 @@ void SortIterator::ramExternalSort(){
             //
             if(cacheRunCount == maxCacheRunsInRAM){
                 outFile.close(); // since we are opening a ifstream to RAM.txt in ramMergeSort(), closing this ofstream
-                // cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
+                cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
                 ramMergeSort(0);
                 _numRAMRuns++;
                 
@@ -301,14 +304,26 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
         }
         
         // tokenize records and push into TT
-        while(getline(inFile,record,'|')){
+        while(getline(inFile,record,'|') && !inFile.eof()){
             q.push(record); // queue of size 1 for the cache runs
             tt_input.push_back(q);
-
             q.pop(); // clear the queue and reuse
         }
         
         // generate runs
+        cout<<"Cache TT Input is:"<<endl;
+        for(int i=0;i<tt_input.size();i++){
+            queue<string> tmp_q = tt_input[i]; //copy the original queue to the temporary queue
+            cout<<"Size of queue "<<i<<" is: "<<tmp_q.size() <<endl;
+
+
+            while (!tmp_q.empty())
+            {
+                string q_element = tmp_q.front();
+                std::cout << q_element <<" ";
+                tmp_q.pop();
+            } 
+        }
         cache_tt.generate_runs(tt_input);
         
         // clear for next use
@@ -374,11 +389,13 @@ void insertCacheRunsInRAM(string cacheRun){
     }
 
     // add run to RAM.txt - we do NOT put this in disk
+    cout<<"Cache run value: "<<cacheRun<<endl;
     ram_file << cacheRun;
 
     // close the file
     ram_file.close();
     SortIterator::_ramUsed += Config::cache_tt_buffer_size;
+    cout<<"Number of records in RAM: "<<SortIterator::_ramUsed <<endl;
 }
 
 // sort the RAM-sized runs
@@ -415,13 +432,12 @@ void SortIterator::diskExternalSort(){
                     }
                     ram_tt_input.push_back(q);
                 }
+                ram_tt.generate_runs(ram_tt_input);
+                ram_tt_input.clear();
             }
             inFile.close();
             // TT will flush its output into RAM3.txt
-            ram_tt.generate_runs(ram_tt_input);
-
-        
-            ram_tt_input.clear();
+                
             // clear RAM.txt
             clearFile(ram);
             // copy file contents from RAM3.txt to RAM.txt
