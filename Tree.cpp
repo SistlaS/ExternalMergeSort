@@ -364,7 +364,8 @@ void Tree::generate_runs(vector<queue<string>> input){
     // opBuffer.push_back(string(1, '\n'));
     // Final flush to ensure all data is written
     // cout<<"BEFORE FLUSHING_________FIN"<<opBuffer.size()<<endl;
-    if(opBuffer.size()){
+    if(!opBuffer.size()){
+        cout<<"_____________________________________HERE"<<endl;
         flush_to_op(true);
     }
     clear_heap();
