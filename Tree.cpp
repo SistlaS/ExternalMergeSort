@@ -272,8 +272,10 @@ Node Tree::pop_winner() {
         
         bool ovc_comp = current.greater(heap[parent_indx], false, heap);
         bool act_comp = current.is_greater(heap[parent_indx]);
-        if (DEBUG_) cout<<ovc_comp<<"<- ovc-----act ->"<<act_comp<<endl;
-        assert(ovc_comp == act_comp && "OVC comparison is different from row wise comparison");
+        if (DEBUG_){
+            cout<<ovc_comp<<"<- ovc-----act ->"<<act_comp<<endl;
+            assert(ovc_comp == act_comp && "OVC comparison is different from row wise comparison");
+        }
         if (ovc_comp) {
             // Current becomes the new loser, propagate the winner
             swap(current, heap[parent_indx]);
