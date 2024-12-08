@@ -70,7 +70,7 @@ public:
     static const RowCount num_ram_TT_leaf_nodes = 32; 
     static const RowCount ram_capacity = 1024;  // Capacity of the RAM.txt = 1024 records => 64 cache size runs => 256 pages 
     static const RowCount ram_buffer_capacity = 32; // Capacity of the RAM buffer = 32 records => 2 cache size runs => 8 pages
-	static const bool DEBUG_ = true;
+	static const bool DEBUG_ = false;
 }; // class Config
 
 
