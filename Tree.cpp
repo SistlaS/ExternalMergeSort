@@ -186,8 +186,20 @@ void Tree::construct_tree(){
         if(input[i].empty()){
             temp = Node({INT_MAX}, index);
         }else{
-            vector<int> rec = convertToInt(input[i].front());
-            temp = Node(rec, index);
+            if(isCache){
+                vector<int> rec = convertToInt(input[i].front());
+                temp = Node(rec, index);
+                
+            }
+            else if(isRam){
+                //load the ovc from the written op
+                vector<int> rec = convertToInt(input[i].front());
+                int ovc = rec.pop_back();
+                temp = Node(rec, index, ovc)
+            }else{
+                cout<<"ERROR*********Both isCache and isRam are false**********"<<endl;
+                return
+            }
             input[i].pop();
         }
         // temp.printNode();
@@ -291,7 +303,7 @@ Node Tree::pop_winner() {
 void Tree::flush_to_op(bool eof){
 	//flush the buffer to op file
     cout<<"In flush"<<endl;
-    if (isRam){
+    if (true){
         ofstream outFile(opFilename, ios::app);
         if (!outFile) {
         std::cerr << "Error: Could not open the file for writing!" << std::endl;
@@ -312,15 +324,15 @@ void Tree::flush_to_op(bool eof){
             std::cerr << "Error occurred while writing to the file." << std::endl;
         }
         //clear the buffer
-        
-    }else{
-        string opString;
-        for (size_t i = 0; i < opBuffer.size(); ++i) {
-            opString += opBuffer[i] + "|";
-        }
-        opString += '\n';
-        SortIterator::insertCacheRunsinRAM(opString);
-    }
+    }   
+    // }else{
+    //     string opString;
+    //     for (size_t i = 0; i < opBuffer.size(); ++i) {
+    //         opString += opBuffer[i] + "|";
+    //     }
+    //     opString += '\n';
+    //     SortIterator::insertCacheRunsinRAM(opString);
+    // }
     opBuffer.clear();
 }
 

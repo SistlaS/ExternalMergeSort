@@ -23,6 +23,7 @@ class Node{
 
 	    Node(vector <int> x) : Data(x), Index(-1), ovc(-1) {}
 		Node(vector <int> x, uint index) : Data(x), Index(index), ovc(-1) {}
+		Node(vector <int> x, uint index, int ovc) : Data(x), Index(index), ovc(ovc) {}
 
 	    // Node(int data, int index = -1, int ovc = -1) 
 	    //     : Data(data), Index(index), ovc(ovc) {}
