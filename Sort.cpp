@@ -123,7 +123,7 @@ SortIterator::SortIterator (SortPlan const * const plan) :
 
     // sort into RAM-sized runs
     ramExternalSort();
-    diskExternalSort();
+    // diskExternalSort();
 	
 	traceprintf ("%s consumed %lu rows\n",
 			_plan->_name,
@@ -302,7 +302,6 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
         
         // tokenize records and push into TT
         while(getline(inFile,record,'|')){
-            record += "|"; // re-adding the delimiter
             q.push(record); // queue of size 1 for the cache runs
             tt_input.push_back(q);
 
@@ -379,10 +378,62 @@ void insertCacheRunsInRAM(string cacheRun){
 
     // close the file
     ram_file.close();
-    SortIterator::_ramUsed+=Config::cache_tt_buffer_size;
+    SortIterator::_ramUsed += Config::cache_tt_buffer_size;
 }
 
 // sort the RAM-sized runs
 void SortIterator::diskExternalSort(){
-    return;
+    RowCount W = _numRAMRuns; // number of RAM runs in disk
+    int F = Config::num_ram_TT_leaf_nodes;
+
+    vector<int> gdFactors = computeGracefulDegradationFactors(W,F); 
+    vector<queue<string>>ram_tt_input; 
+
+    int numRuns = gdFactors.size();
+    // loop continues till all of Disk is merged into one sorted run
+    while(numRuns > 1){
+
+        // Open Disk.txt in input mode
+        ifstream inFile(disk,ios::in);
+        if (!inFile or !inFile.is_open()) {
+            cout << "Error: Could not open ifstream file " << disk << endl;
+            exit(1);
+        }
+        numRuns = gdFactors.size();
+
+        for(int i=0;i<numRuns;i++){
+            while(ram_tt_input.size()< gdFactors[i] && !inFile.eof()){
+                string run;
+                // run is delimited by newline character
+                while(getline(inFile,run,'\n')){
+                    // break the run into records and push the run into a queue
+                    std::stringstream ss(run);
+                    string record;
+                    queue<string> q;
+                    while(getline(ss,record,'|')){
+                        q.push(record);
+                    }
+                    ram_tt_input.push_back(q);
+                }
+            }
+            inFile.close();
+            // TT will flush its output into RAM3.txt
+            ram_tt.generate_runs(ram_tt_input);
+
+        
+            ram_tt_input.clear();
+            // clear RAM.txt
+            clearFile(ram);
+            // copy file contents from RAM3.txt to RAM.txt
+            copyFileContents(sorted_ram_output,ram,1);
+            // clear RAM3.txt
+            clearFile(sorted_ram_output);
+        }
+        gdFactors = computeGracefulDegradationFactors(numRuns,Config::num_ram_TT_leaf_nodes);
+    }
+
+    // in the last run,
+    // processing is complete, move sorted data fom RAM.txt to Disk.txt
+    copyFileContents(ram,disk,1);
+    clearFile(ram);
 }
