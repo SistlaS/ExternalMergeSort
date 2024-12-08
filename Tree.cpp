@@ -353,7 +353,12 @@ void Tree::generate_runs(vector<queue<string>> input){
 
     	if(opBuffer.size()==BUFFER_SIZE){ 
             // cout<<"BEFORE FLUSHING_________"<<opBuffer.size()<<endl;
-    		flush_to_op(false);
+            if (isRam){
+                flush_to_op(false);
+            }else{
+                flush_to_op(true);
+            }
+    		
     	}
     }
     // opBuffer.push_back(string(1, '\n'));
