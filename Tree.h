@@ -73,6 +73,7 @@ class Tree{
 		uint leftChild_index(uint);
 		uint rightChild_index(uint);
 		void print_tree();
+		void clear_heap();
 
 
 		~Tree();

@@ -109,6 +109,9 @@ bool Node::greater(Node& other, bool full_, vector<Node>& heap){
     	loser.printNode();
 		cout<<"Setting ovc for "<<loser.getIndex()<<","<<offset<<endl;
     }
+    if (loser.Data[0] == INT_MAX){
+        offset = -1;
+    }
     
     loser.setOvc(offset);
 	heap[loser.getIndex()].setOvc(offset);
@@ -212,6 +215,7 @@ void Tree::construct_tree(){
 			parent_indx = parent_index(parent_indx);
 		}
 	}
+    // print_tree();
 	if (DEBUG_) print_tree();
 }
 
@@ -292,7 +296,7 @@ Node Tree::pop_winner() {
 
 void Tree::flush_to_op(bool eof){
 	//flush the buffer to op file
-    cout<<"In flush"<<endl;
+    cout<<"In flush : "<<opBuffer.size()<<endl;
     if (isRam){
         ofstream outFile(opFilename, ios::app);
         if (!outFile) {
@@ -321,27 +325,51 @@ void Tree::flush_to_op(bool eof){
             opString += opBuffer[i] + "|";
         }
         opString += '\n';
+        // cout<<op
         insertCacheRunsInRAM(opString);
     }
     opBuffer.clear();
 }
 
+void Tree::clear_heap(){
+    this->heap = std::vector<Node>(this->capacity);
+}
+
 void Tree::generate_runs(vector<queue<string>> input){
+    // construct_tree();
     this->input = input;
+    // cout<<"/nInput size :"<<input.size()<<endl;
+    // print_tree();
+
+    // for(int i =0; i<input.size();i++){
+    //     queue<string> temp_q = input[i];
+    //     // cout<<"-------------------------"<<input[i].size();
+    //     while (!temp_q.empty())
+    //         {
+    //             string q_element = temp_q.front();
+    //             std::cout << q_element <<" ";
+    //             temp_q.pop();
+    //         } 
+    //     cout<<endl;
+    // }
     construct_tree();
 	while(!is_empty()){
     	Node temp = pop_winner();
     	cout<<"popping :";
-    	temp.printNode();
+    	// temp.printNode();
+        // cout<<temp.getDataStr();
     	opBuffer.push_back(temp.getDataStr());
+
     	if(opBuffer.size()==BUFFER_SIZE){ 
+            // cout<<"BEFORE FLUSHING_________"<<opBuffer.size()<<endl;
     		flush_to_op(false);
     	}
     }
     // opBuffer.push_back(string(1, '\n'));
     // Final flush to ensure all data is written
+    // cout<<"BEFORE FLUSHING_________"<<opBuffer.size()<<endl;
     flush_to_op(true);
-
+    clear_heap();
 }
 
 // int main(int argc, char const *argv[])
@@ -384,7 +412,17 @@ void Tree::generate_runs(vector<queue<string>> input){
 //     uint n = 2;
 //     string outputFilename = "output.txt";
 
-//     Tree tree(n, outputFilename);
+//     Tree tree(n, "");
+//     tree.generate_runs(input);
+//     vector<queue<string>> input2;
+//     queue<string> q3;
+
+//     q1.push("86, 10, 1, 22");
+//     input2.push_back(q3);
+
+//     queue<string> q4;
+//     q2.push("16, 4, 9, 6");
+//     input2.push_back(q4);
 //     tree.generate_runs(input);
 //     // Construct the tree
 //     // tree.construct_tree();
