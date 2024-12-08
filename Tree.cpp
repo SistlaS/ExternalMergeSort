@@ -319,7 +319,7 @@ void Tree::flush_to_op(bool eof){
             opString += opBuffer[i] + "|";
         }
         opString += '\n';
-        SortIterator::insertCacheRunsinRAM(opString);
+        SortIterator::insertCacheRunsInRAM(opString);
     }
     opBuffer.clear();
 }
