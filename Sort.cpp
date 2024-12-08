@@ -20,6 +20,9 @@ string temp_disk = "Disk2.txt"; // Store the spilled cache-size runs in a temp f
 Tree cache_tt(Config::num_cache_TT_leaf_nodes,"");
 // init RAM TT
 Tree ram_tt(Config::num_ram_TT_leaf_nodes,sorted_ram_output);
+RowCount SortIterator::_bufferSpills = 0;
+RowCount SortIterator::_ramBufferUsed = 0;
+RowCount SortIterator::_ramUsed = 0;
 
 
 /* File management functions */
@@ -222,12 +225,12 @@ void SortIterator::ramExternalSort(){
     int cacheRunCount = 0;
 
     // First process the runs in the buffer - place them into the RAM.txt
-    if(_ramBufferUsed!=0){
+    if(SortIterator::_ramBufferUsed!=0){
         copyFileContents(ram_buffer,ram,1);
-        cacheRunCount += (_ramBufferUsed/Config::cache_tt_buffer_size);
+        cacheRunCount += (SortIterator::_ramBufferUsed/Config::cache_tt_buffer_size);
         // cout<<"Number of runs in the RAM buffer "<<cacheRunCount<<endl;
         clearFile(ram_buffer);
-        _ramBufferUsed=0;
+        SortIterator::_ramBufferUsed=0;
     }
 
     if(_bufferSpills!=0){
@@ -333,20 +336,20 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
 }
 
 // move RAM buffer contents into a temp file in Disk
-void SortIterator::spillBufferToDisk(){
+void spillBufferToDisk(){
     copyFileContents(ram_buffer, temp_disk,1);
     clearFile(ram_buffer);
-    _bufferSpills++;
+    SortIterator::_bufferSpills++;
 }
 
-void SortIterator::insertCacheRunsInRAM(string cacheRun){
+void insertCacheRunsInRAM(string cacheRun){
     
     // if we have enough records in RAM.txt OR if its the last batch of records
-    if(_ramUsed == Config::ram_capacity){
+    if(SortIterator::_ramUsed == Config::ram_capacity){
         // if buffer is full, spill to disk
-        if(_ramBufferUsed == Config::ram_buffer_capacity){
+        if(SortIterator::_ramBufferUsed == Config::ram_buffer_capacity){
             spillBufferToDisk();
-            _ramBufferUsed=0;
+            SortIterator::_ramBufferUsed=0;
         }
         // else, write into RAM buffer 
         ofstream ram_buffer_file(ram_buffer, ios::app);
@@ -360,7 +363,7 @@ void SortIterator::insertCacheRunsInRAM(string cacheRun){
         // close the file
         ram_buffer_file.close();
         
-        _ramBufferUsed+=Config::cache_tt_buffer_size;
+        SortIterator::_ramBufferUsed+=Config::cache_tt_buffer_size;
         return;
     }
 
@@ -376,7 +379,7 @@ void SortIterator::insertCacheRunsInRAM(string cacheRun){
 
     // close the file
     ram_file.close();
-    _ramUsed+=Config::cache_tt_buffer_size;
+    SortIterator::_ramUsed+=Config::cache_tt_buffer_size;
 }
 
 // sort the RAM-sized runs

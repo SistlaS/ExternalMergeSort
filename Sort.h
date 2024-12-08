@@ -20,13 +20,16 @@ public:
 	bool next (Row & row);
 	void free (Row & row);
     void generateCacheRuns(Row row, bool lastBatch);
-    void insertCacheRunsInRAM(string cacheRun);
-    void spillBufferToDisk();
     void ramExternalSort();
     void diskExternalSort();
+    static RowCount _ramUsed, _ramBufferUsed, _bufferSpills;
 private:
 	SortPlan const * const _plan;
 	Iterator * const _input;
-	RowCount _consumed, _produced,_cacheUsed,_ramUsed, _ramBufferUsed, _numRAMRuns, _bufferSpills;
+	RowCount _consumed, _produced,_cacheUsed, _numRAMRuns;
     bool isLastBatch = false;
 }; // class SortIterator
+
+void insertCacheRunsInRAM(string cacheRun);
+void spillBufferToDisk();
+

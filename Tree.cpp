@@ -319,7 +319,7 @@ void Tree::flush_to_op(bool eof){
             opString += opBuffer[i] + "|";
         }
         opString += '\n';
-        SortIterator::insertCacheRunsInRAM(opString);
+        insertCacheRunsInRAM(opString);
     }
     opBuffer.clear();
 }
@@ -342,51 +342,51 @@ void Tree::generate_runs(vector<queue<string>> input){
 
 }
 
-int main(int argc, char const *argv[])
-{
-    vector<queue<string>> input;
-    queue<string> q1;
+// int main(int argc, char const *argv[])
+// {
+//     vector<queue<string>> input;
+//     queue<string> q1;
 
-    q1.push("6, 10, 1, 7");
-    input.push_back(q1);
+//     q1.push("6, 10, 1, 7");
+//     input.push_back(q1);
 
-    queue<string> q2;
-    q2.push("6, 4, 9, 6");
-    input.push_back(q2);
+//     queue<string> q2;
+//     q2.push("6, 4, 9, 6");
+//     input.push_back(q2);
 
-    // q1.push("2, 4, 3, 0");
-    // q1.push("3, 0, 1, 3");
-    // q1.push("5, 5, 3, 4");
-    // input.push_back(q1);
+//     // q1.push("2, 4, 3, 0");
+//     // q1.push("3, 0, 1, 3");
+//     // q1.push("5, 5, 3, 4");
+//     // input.push_back(q1);
 
-    // queue<string> q2;
-    // q2.push("2, 2, 0, 1");
-    // q2.push("2, 4, 4, 5");
-    // q2.push("4, 4, 8, 9");
-    // input.push_back(q2);
+//     // queue<string> q2;
+//     // q2.push("2, 2, 0, 1");
+//     // q2.push("2, 4, 4, 5");
+//     // q2.push("4, 4, 8, 9");
+//     // input.push_back(q2);
 
-    // queue<string> q3;
-    // q3.push("4, 5, 0, 6");
-    // q3.push("9, 8, 8, 6");
-    // input.push_back(q3);
+//     // queue<string> q3;
+//     // q3.push("4, 5, 0, 6");
+//     // q3.push("9, 8, 8, 6");
+//     // input.push_back(q3);
 
-    // queue<string> q4;
-    // q4.push("5,0,0,0,");
-    // q4.push("5,0,3,0,");
-    // input.push_back(q4);
+//     // queue<string> q4;
+//     // q4.push("5,0,0,0,");
+//     // q4.push("5,0,3,0,");
+//     // input.push_back(q4);
 
-    // queue<string> q5;
-    // q5.push("6,1,10,3,");
-    // q5.push("6,1,10,8,");
-    // input.push_back(q5);
-    uint n = 2;
-    string outputFilename = "output.txt";
+//     // queue<string> q5;
+//     // q5.push("6,1,10,3,");
+//     // q5.push("6,1,10,8,");
+//     // input.push_back(q5);
+//     uint n = 2;
+//     string outputFilename = "output.txt";
 
-    Tree tree(n, outputFilename);
-    tree.generate_runs(input);
-    // Construct the tree
-    // tree.construct_tree();
+//     Tree tree(n, outputFilename);
+//     tree.generate_runs(input);
+//     // Construct the tree
+//     // tree.construct_tree();
     
-    tree.print_tree();
-    return 0;
-}
+//     tree.print_tree();
+//     return 0;
+// }
