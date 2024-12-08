@@ -55,6 +55,8 @@ class Tree{
 		vector<queue<string>> input;
 		vector<string> opBuffer;
 		string opFilename;
+		bool isCache;
+		bool isRam;
 
 		Tree(uint capacity, string opFilename);
 
