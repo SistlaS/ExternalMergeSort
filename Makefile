@@ -11,13 +11,13 @@ SCRS=
 
 # headers and code sources
 HDRS=	defs.h \
-		Iterator.h Scan.h Filter.h Sort.h Witness.h
+		Iterator.h Scan.h Filter.h Sort.h Witness.h Tree.h
 SRCS=	defs.cpp Assert.cpp Test.cpp \
-		Iterator.cpp Scan.cpp Filter.cpp Sort.cpp Witness.cpp
+		Iterator.cpp Scan.cpp Filter.cpp Sort.cpp Witness.cpp Tree.cpp
 
 # compilation targets
 OBJS=	defs.o Assert.o Test.o \
-		Iterator.o Scan.o Filter.o Sort.o Witness.o
+		Iterator.o Scan.o Filter.o Tree.o Sort.o Witness.o 
 
 # RCS assists
 REV=-q -f
@@ -39,6 +39,7 @@ Iterator.o Scan.o Filter.o Sort.o : Iterator.h
 Scan.o : Scan.h
 Filter.o : Filter.h
 Sort.o : Sort.h
+Tree.o : Tree.h
 Witness.o : Witness.h
 
 list : Makefile

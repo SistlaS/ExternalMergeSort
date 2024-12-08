@@ -1,6 +1,5 @@
 #include "Tree.h"
 #include <cassert>
-#include <"Sort.h">
 
 int ROW_SIZE = Config::column_count;
 int BUFFER_SIZE = Config::cache_tt_buffer_size;

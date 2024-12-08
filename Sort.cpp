@@ -187,7 +187,6 @@ void ramMergeSort(int W){
                 }
             }
             inFile.close();
-            
             // TT will flush its output into RAM3.txt
             ram_tt.generate_runs(ram_tt_input);
 
