@@ -63,12 +63,20 @@ public:
     // static const int record_size = 16;   // Size of a record (in bytes)
 
     // Sizes of memory units (all in # of records)
-    static const RowCount page_size = 4;
-    static const RowCount tt_buffer_size = 4; // Cache buffer size = Cache TT Fan-in, 16 records = 4 pages
-    static const RowCount num_cache_TT_leaf_nodes = 4; 
-    static const RowCount num_ram_TT_leaf_nodes = 4; 
-    static const RowCount ram_capacity = 16;  // Capacity of the RAM.txt = 1024 records => 64 cache size runs => 256 pages 
-    static const RowCount ram_buffer_capacity = 4; // Capacity of the RAM buffer = 32 records => 2 cache size runs => 8 pages
+    // static const RowCount page_size = 4;
+    // static const RowCount tt_buffer_size = 4; // Cache buffer size = Cache TT Fan-in, 16 records = 4 pages
+    // static const RowCount num_cache_TT_leaf_nodes = 4; 
+    // static const RowCount num_ram_TT_leaf_nodes = 4; 
+    // static const RowCount ram_capacity = 16;  // Capacity of the RAM.txt = 1024 records => 64 cache size runs => 256 pages 
+    // static const RowCount ram_buffer_capacity = 4; // Capacity of the RAM buffer = 32 records => 2 cache size runs => 8 pages
+	// static const bool DEBUG_ = false;
+
+	static const RowCount page_size = 4;
+    static const RowCount tt_buffer_size = page_size*4; // Cache buffer size = Cache TT Fan-in, 16 records = 4 pages
+    static const RowCount num_cache_TT_leaf_nodes = page_size*4; 
+    static const RowCount num_ram_TT_leaf_nodes = page_size*8; 
+    static const RowCount ram_capacity = page_size*256;  // Capacity of the RAM.txt = 1024 records => 64 cache size runs => 256 pages 
+    static const RowCount ram_buffer_capacity = page_size*8; // Capacity of the RAM buffer = 32 records => 2 cache size runs => 8 pages
 	static const bool DEBUG_ = false;
 }; // class Config
 

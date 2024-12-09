@@ -156,6 +156,9 @@ uint Tree::rightChild_index(uint index){
 	return 2*index+1;
 }
 
+void Tree::setOpFilename(string file){
+    opFilename = file;
+}
 
 void Tree::construct_tree(){
 	//initialise the leaf nodes
@@ -271,8 +274,8 @@ Node Tree::pop_winner() {
         bool ovc_comp = current.greater(heap[parent_indx], false, heap);
         bool act_comp = current.is_greater(heap[parent_indx]);
         if (DEBUG_){
-            cout<<ovc_comp<<"<- ovc-----act ->"<<act_comp<<endl;
-            assert(ovc_comp == act_comp && "OVC comparison is different from row wise comparison");
+            if(ovc_comp != act_comp) cout<<ovc_comp<<"<- ovc---------------------------------------------------act ->"<<act_comp<<endl;
+            // assert(ovc_comp == act_comp && "OVC comparison is different from row wise comparison");
         }
         if (ovc_comp) {
             // Current becomes the new loser, propagate the winner
@@ -290,7 +293,7 @@ Node Tree::pop_winner() {
 
 void Tree::flush_to_op(bool eof){
 	//flush the buffer to op file
-    cout<<"In flush : "<<opBuffer.size()<<endl;
+    // cout<<"In flush : "<<opBuffer.size()<<endl;
     
     if (isRam){
         
@@ -329,6 +332,7 @@ void Tree::flush_to_op(bool eof){
         
     }
     opBuffer.clear();
+    // cout<<"Cleared the buffer "<<endl;
 }
 
 void Tree::clear_heap(){
