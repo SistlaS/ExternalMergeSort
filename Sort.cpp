@@ -174,6 +174,121 @@ void SortIterator::free (Row & row)
 
 /* Sort Functions */
 
+/* --------------------------- CACHE && CACHE->RAM ----------------------------*/
+
+// Generates cache size mini runs
+void SortIterator::generateCacheRuns(Row row, bool lastBatch){
+
+    // if we have enough records in Cache.txt OR if its the last batch of records, generate the cache runs
+    if(_cacheUsed == Config::num_cache_TT_leaf_nodes or lastBatch){
+        // pull all records into string by tokens
+        string record;
+        // Input for the cache TT
+        vector<queue<string>> tt_input;
+        queue<string> q;
+
+        // Open Cache.txt
+        ifstream inFile(cache,ios::in);
+        if (!inFile) {
+            cout << "Error: Could not open ifstream file " << cache << endl;
+            exit(1);
+        }
+        
+        // tokenize records and push into TT
+        while(getline(inFile,record,'|') && !inFile.eof()){
+            q.push(record); // queue of size 1 for the cache runs
+            tt_input.push_back(q);
+            q.pop(); // clear the queue and reuse
+        }
+        
+        // call the TT
+        cache_tt.generate_runs(tt_input);
+        
+        // clear for next use
+        tt_input.clear();
+        inFile.close(); 
+        clearFile(cache);
+        _cacheUsed = 0;
+    }
+    
+    // don't write to cache.txt if last batch
+    if(lastBatch) return;
+
+    // write record into cache
+    ofstream outfile(cache,ios::app);
+    if(!outfile.is_open()){
+        cerr<<"Issue with opening Cache.txt, exit\n";
+        exit(1);
+    }
+    outfile << row.getRow();
+    outfile.close();
+
+    ++ _consumed;
+    cout<<"Number of values consumed: "<<_consumed<<endl;
+    ++ _cacheUsed;
+}
+
+// move RAM buffer contents into a temp file in Disk
+void spillBufferToDisk(){
+    copyFileContents(ram_buffer, temp_disk,1);
+    clearFile(ram_buffer);
+    SortIterator::_bufferSpills++;
+}
+
+// // move RAM contents to temp file in Disk
+// void spillRAMToDisk(){
+//     copyFileContents(ram, temp_disk,1);
+//     cout<<"Printing RAM contents as it is flushed to disk:"<<endl;
+//     print_file_contents(ram);
+//     clearFile(ram);
+//     SortIterator::_ramUsed=0;
+// }
+
+void insertCacheRunsInRAM(string cacheRun){
+    if(cacheRun=="\n") return;
+
+    // if we have enough records in RAM.txt OR if its the last batch of records
+    if(SortIterator::_ramUsed == Config::ram_capacity){
+        // if buffer is full, spill to disk
+        if(SortIterator::_ramBufferUsed == Config::ram_buffer_capacity){
+            spillBufferToDisk();
+            SortIterator::_ramBufferUsed=0;
+        }
+        // else, write into RAM buffer 
+        ofstream ram_buffer_file(ram_buffer, ios::app);
+        if(!ram_buffer_file.is_open()){
+            cerr<<"Issue with opening RAM_buffer.txt, exit\n";
+            exit(1);
+        }
+
+        // add record in buffer
+        ram_buffer_file << cacheRun;
+        ram_buffer_file.close();
+        
+        SortIterator::_ramBufferUsed+=Config::tt_buffer_size;
+        return;
+    }
+
+    // Open RAM.txt
+    ofstream ram_file(ram, ios::app);
+    if(!ram_file.is_open()){
+        cerr<<"Issue with opening RAM.txt, exit\n";
+        exit(1);
+    }
+
+    // add run to RAM.txt - we do NOT put this in disk
+    cout<<"Cache run value: "<<cacheRun<<endl;
+    ram_file << cacheRun;
+    ram_file.close();
+    
+    SortIterator::_ramUsed += Config::tt_buffer_size;
+    cout<<"Number of records in RAM: "<<SortIterator::_ramUsed <<endl;
+}
+
+
+/* ------------------------------ RAM Merge Sort & RAM->Disk ---------------------------------------*/
+
+
 // performs external merge sort on cache size runs present in the RAM. Generates RAM-sized runs and writes them to disk
 void ramMergeSort(int W){
 
@@ -356,115 +471,6 @@ void SortIterator::ramExternalSort(){
     
 }
 
-// Generates cache size mini runs
-void SortIterator::generateCacheRuns(Row row, bool lastBatch){
-
-    // if we have enough records in Cache.txt OR if its the last batch of records, generate the cache runs
-    if(_cacheUsed == Config::num_cache_TT_leaf_nodes or lastBatch){
-        // pull all records into string by tokens
-        string record;
-        // Input for the cache TT
-        vector<queue<string>> tt_input;
-        queue<string> q;
-
-        // Open Cache.txt
-        ifstream inFile(cache,ios::in);
-        if (!inFile) {
-            cout << "Error: Could not open ifstream file " << cache << endl;
-            exit(1);
-        }
-        
-        // tokenize records and push into TT
-        while(getline(inFile,record,'|') && !inFile.eof()){
-            q.push(record); // queue of size 1 for the cache runs
-            tt_input.push_back(q);
-            q.pop(); // clear the queue and reuse
-        }
-        
-        // call the TT
-        cache_tt.generate_runs(tt_input);
-        
-        // clear for next use
-        tt_input.clear();
-        inFile.close(); 
-        clearFile(cache);
-        _cacheUsed = 0;
-    }
-    
-    // don't write to cache.txt if last batch
-    if(lastBatch) return;
-
-    // write record into cache
-    ofstream outfile(cache,ios::app);
-    if(!outfile.is_open()){
-        cerr<<"Issue with opening Cache.txt, exit\n";
-        exit(1);
-    }
-    outfile << row.getRow();
-    outfile.close();
-
-    ++ _consumed;
-    cout<<"Number of values consumed: "<<_consumed<<endl;
-    ++ _cacheUsed;
-}
-
-// move RAM buffer contents into a temp file in Disk
-void spillBufferToDisk(){
-    copyFileContents(ram_buffer, temp_disk,1);
-    clearFile(ram_buffer);
-    SortIterator::_bufferSpills++;
-}
-
-// // move RAM contents to temp file in Disk
-// void spillRAMToDisk(){
-//     copyFileContents(ram, temp_disk,1);
-//     cout<<"Printing RAM contents as it is flushed to disk:"<<endl;
-//     print_file_contents(ram);
-//     clearFile(ram);
-//     SortIterator::_ramUsed=0;
-// }
-
-void insertCacheRunsInRAM(string cacheRun){
-    if(cacheRun=="\n") return;
-
-    // if we have enough records in RAM.txt OR if its the last batch of records
-    if(SortIterator::_ramUsed == Config::ram_capacity){
-        // if buffer is full, spill to disk
-        if(SortIterator::_ramBufferUsed == Config::ram_buffer_capacity){
-            spillBufferToDisk();
-            SortIterator::_ramBufferUsed=0;
-        }
-        // else, write into RAM buffer 
-        ofstream ram_buffer_file(ram_buffer, ios::app);
-        if(!ram_buffer_file.is_open()){
-            cerr<<"Issue with opening RAM_buffer.txt, exit\n";
-            exit(1);
-        }
-
-        // add record in buffer
-        ram_buffer_file << cacheRun;
-        ram_buffer_file.close();
-        
-        SortIterator::_ramBufferUsed+=Config::tt_buffer_size;
-        return;
-    }
-
-    // Open RAM.txt
-    ofstream ram_file(ram, ios::app);
-    if(!ram_file.is_open()){
-        cerr<<"Issue with opening RAM.txt, exit\n";
-        exit(1);
-    }
-
-    // add run to RAM.txt - we do NOT put this in disk
-    cout<<"Cache run value: "<<cacheRun<<endl;
-    ram_file << cacheRun;
-    ram_file.close();
-    
-    SortIterator::_ramUsed += Config::tt_buffer_size;
-    cout<<"Number of records in RAM: "<<SortIterator::_ramUsed <<endl;
-}
-
 // // function to flush data into disk when RAM reaches max size
 // // ramRun = RAM TT Output buffer contents
 // void insertRAMRunsInDisk(string ramRun){
@@ -496,6 +502,8 @@ void insertCacheRunsInRAM(string cacheRun){
 //     //     return;
 //     // }
 // }
+
+/* ----------------------------------- DISK Merge Sort -------------------------------*/
 
 // sort the RAM-sized runs
 void SortIterator::diskExternalSort(){
