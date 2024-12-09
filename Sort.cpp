@@ -21,6 +21,7 @@ string temp_disk = "Disk2.txt"; // Store the spilled cache-size runs in a temp f
 Tree cache_tt(Config::num_cache_TT_leaf_nodes,"");
 // init RAM TT
 Tree ram_tt(Config::num_ram_TT_leaf_nodes,sorted_ram_output);
+Tree disk_tt(Config::num_ram_TT_leaf_nodes,temp_disk);
 RowCount SortIterator::_bufferSpills = 0;
 RowCount SortIterator::_ramBufferUsed = 0;
 RowCount SortIterator::_ramUsed = 0;
@@ -234,7 +235,7 @@ void ramMergeSort(int W){
                 clearFile(sorted_ram_output);
                 // cout<<"Calling RAM TT"<<endl;
                 // TT will flush its output into RAM3.txt
-                ram_tt.generate_runs(ram_tt_input,false);
+                ram_tt.generate_runs(ram_tt_input);
                 // cout<<"Checking if RAM3.txt has data in it\n";
                 // print_file_contents(sorted_ram_output);
                 // clear RAM.txt
@@ -398,7 +399,7 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
         //         tmp_q.pop();
         //     } 
         // }
-        cache_tt.generate_runs(tt_input,false);
+        cache_tt.generate_runs(tt_input);
         
         // clear for next use
         tt_input.clear();
@@ -564,7 +565,7 @@ void SortIterator::diskExternalSort(){
             // inFile.close();
             if(!ram_tt_input.empty()){
                 cout<<"Number of inputs sent to TT : "<<ram_tt_input.size()<<"-------------- tot records : "<<tot_recs<<endl;
-                ram_tt.generate_runs(ram_tt_input,true);
+                disk_tt.generate_runs(ram_tt_input);
                 ram_tt_input.clear();
             }
             
