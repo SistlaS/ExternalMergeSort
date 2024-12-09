@@ -30,7 +30,6 @@ private:
     bool isLastBatch = false;
 }; // class SortIterator
 
-void insertRAMRunsInDisk(string ramRun);
 void insertCacheRunsInRAM(string cacheRun);
 void spillBufferToDisk();
 

@@ -21,7 +21,6 @@ string temp_disk = "Disk2.txt"; // Store the spilled cache-size runs in a temp f
 Tree cache_tt(Config::num_cache_TT_leaf_nodes,"");
 // init RAM TT
 Tree ram_tt(Config::num_ram_TT_leaf_nodes,sorted_ram_output);
-// init RAM TT for DiskSort
 Tree disk_tt(Config::num_ram_TT_leaf_nodes,temp_disk);
 RowCount SortIterator::_bufferSpills = 0;
 RowCount SortIterator::_ramBufferUsed = 0;
@@ -29,6 +28,7 @@ RowCount SortIterator::_ramUsed = 0;
 
 
 /* File management functions */
+
 void print_file_contents(string filename){
     cout<< "Printing contents of file "<<filename<<endl;
 
@@ -40,6 +40,8 @@ void print_file_contents(string filename){
     f.close();
 }
 
+
+// copy file contents from src to dest
 bool copyFileContents(string sourceFileName, string destinationFileName, int mode){
 	// Open the source file in input mode
     ifstream inFile(sourceFileName,ios::in);
@@ -82,7 +84,6 @@ void clearFile(string filename){
     clear_file.close();
 }
 
-/* Compute optimal merge values for a given number of runs. Values are stored and referred to as necessary*/
 vector<int> computeGracefulDegradationFactors(int W, int F){
     vector<int> gd;
 
@@ -99,7 +100,6 @@ vector<int> computeGracefulDegradationFactors(int W, int F){
     return gd;
 }
 
-/********************* SortPlan ******************************** */
 SortPlan::SortPlan (char const * const name, Plan * const input)
 	: Plan (name), _input (input)
 {
@@ -118,7 +118,6 @@ Iterator * SortPlan::init () const
 	return new SortIterator (this);
 } // SortPlan::init
 
-/********************* SortIterator ******************************** */
 SortIterator::SortIterator (SortPlan const * const plan) :
 	_plan (plan), _input (plan->_input->init ()),
 	_consumed (0), _produced (0)
@@ -135,12 +134,31 @@ SortIterator::SortIterator (SortPlan const * const plan) :
         Row row; // passing dummy value
         generateCacheRuns(row,true);
     }
+    // cout<<"************ RAM CONTENTS ************"<<endl;
+    // print_file_contents(ram);
 
+    // cout<<"************ RAM BUFFER CONTENTS ************"<<endl;
+    // print_file_contents(ram_buffer);
+
+    // cout<<"************ TEMP DISK CONTENTS ************"<<endl;
+    // print_file_contents(temp_disk);
     // sort into RAM-sized runs
     ramExternalSort();
 
-    diskExternalSort();
+    // cout<<"************ RAM CONTENTS ************"<<endl;
+    // print_file_contents(ram);
 
+    // cout<<"************ RAM BUFFER CONTENTS ************"<<endl;
+    // print_file_contents(ram_buffer);
+
+    // cout<<"************ TEMP DISK CONTENTS ************"<<endl;
+    // print_file_contents(temp_disk);
+
+    //  cout<<"************ DISK CONTENTS ************"<<endl;
+    // print_file_contents(disk);
+    // complete the sort with external merge
+
+    diskExternalSort();
 	
 	traceprintf ("%s consumed %lu rows\n",
 			_plan->_name,
@@ -170,13 +188,11 @@ void SortIterator::free (Row & row)
 	TRACE (true);
 } // SortIterator::free
 
-
 void ramMergeSort(int W){
     cout<<"Number of Cache size runs: "<<W<<endl;
     int numMergePerLevel = W;
     int mergeStep=1;
     // loop continues till all of Disk is merged into one sorted run
-
     while(true){
 
         // Open Disk.txt in input mode
@@ -197,12 +213,11 @@ void ramMergeSort(int W){
             break;
         }
         
-        int size = gdFactors.size();
-        for(int i=0;i<size;i++){
+        for(int i=0;i<gdFactors.size();i++){
             vector<queue<string>>ram_tt_input;
-            int numQ=0;
+            int tot_recs = 0;
             string run;
-            while(numQ< gdFactors[i] && getline(inFile,run,'\n') && !inFile.eof()){
+            while(ram_tt_input.size()< gdFactors[i] && getline(inFile,run,'\n') && !inFile.eof()){
                
                 cout<<"Run is: "<<run<<endl;
                 std::stringstream ss(run);
@@ -213,15 +228,16 @@ void ramMergeSort(int W){
                     q.push(record);
                     numRecords++;
                 }
-
+                tot_recs += numRecords;
                 ram_tt_input.push_back(q);
-                numQ++;
+                cout<<"Number of records in this run: "<<numRecords<<endl;
+                
             }
             // inFile.close();
             if(!ram_tt_input.empty()){
+                cout<<"Number of inputs sent to TT : "<<ram_tt_input.size()<<"-------------- tot records : "<<tot_recs<<endl;
                 ram_tt.generate_runs(ram_tt_input);
                 ram_tt_input.clear();
-                numQ=0;
             }
             
         }
@@ -244,6 +260,89 @@ void ramMergeSort(int W){
     clearFile(sorted_ram_output); 
 }
 
+// performs external merge sort on cache size runs present in the RAM. Generates RAM-sized runs and writes them to disk
+// void ramMergeSort(int W){
+
+//     cout<<"Number of cache size runs: "<<W<<endl;
+
+//     vector<int> gdFactors = computeGracefulDegradationFactors(W,Config::num_ram_TT_leaf_nodes); 
+//     int numMergePerLevel = g
+
+//     for (int i = 0; i < numMergePerLevel; i++){
+//         cout<<gdFactors[i]<<" -- ";
+//     }
+//     // loop continues till all of RAM is merged into one sorted run
+//     while(true){
+
+//         // Open RAM.txt in input mode
+//         ifstream inFile(ram,ios::in);
+//         if (!inFile or !inFile.is_open()) {
+//             cout << "Error: Could not open ifstream file " << ram << endl;
+//             exit(1);
+//         }
+//         numMergePerLevel = gdFactors.size();
+//         cout<<"Number of merges per merge step: "<<numMergePerLevel<<endl;
+//         // Breaking condition: If only one run remains, we exit the loop
+//         if(numMergePerLevel==1 && gdFactors[0]==1) {
+//             cout<<"Breaking in RAM merge sort \n";
+//             break;
+        // }
+        
+        // // Columns are delimited by ','
+        // // Records(aka rows) are delimited by '|'
+        // // Runs are delimited by '\n'
+        // for(int i=0;i<numMergePerLevel;i++){
+        //     vector<queue<string>>ram_tt_input;
+        //     string run;
+        //     while(ram_tt_input.size()< gdFactors[i] && getline(inFile,run,'\n') && !inFile.eof()){
+        //         // run is delimited by newline character
+        //         // break the run into records and push the run into a queue
+        //         cout<<"Run is: "<<run<<endl;
+        //         std::stringstream ss(run);
+        //         string record;
+        //         queue<string> q;
+        //         int numRecords=0;
+        //         while(getline(ss,record,'|')){
+        //             q.push(record);
+        //             numRecords++;
+        //         }
+        //         ram_tt_input.push_back(q);
+        //         cout<<"Number of records in this run: "<<numRecords<<endl;
+        //     }
+        //     // cout<<"RAM TT Input is:"<<endl;
+        //     // for(int i=0;i<ram_tt_input.size();i++){
+        //     //     queue<string> tmp_q = ram_tt_input[i]; //copy the original queue to the temporary queue
+        //     //     cout<<"Size of queue "<<i<<" is: "<<tmp_q.size() <<" Contents of the queue is: ";
+        //     //     while (!tmp_q.empty())
+        //     //     {
+        //     //         string q_element = tmp_q.front();
+        //     //         std::cout << q_element <<"\n";
+        //     //         tmp_q.pop();
+        //     //     } 
+    //         // }
+    //         inFile.close();
+    //         if(!ram_tt_input.empty()){
+    //             // prepare for new batch of sorted runs
+    //             clearFile(sorted_ram_output);
+
+    //             // call the TT
+    //             // TT will flush its output into RAM3.txt
+    //             ram_tt.generate_runs(ram_tt_input);
+    //             // clear RAM.txt
+    //             clearFile(ram);
+    //             // copy file contents from RAM3.txt to RAM.txt
+    //             copyFileContents(sorted_ram_output,ram,1);
+    //         }
+    //     }
+    //     // Compute new values, based on the new number of runs
+    //     gdFactors = computeGracefulDegradationFactors(numMergePerLevel,Config::num_ram_TT_leaf_nodes);
+    // }
+
+//     // processing is complete, move sorted data fom RAM.txt to Disk.txt
+//     copyFileContents(ram,disk,1);
+//     clearFile(ram);
+//     clearFile(sorted_ram_output); 
+// }
 
 // Sort all cache-size runs into ram-size runs. Store this data into disk
 // Pulls data from RAM, RAM Buffer and from the temp disk storage
@@ -252,13 +351,13 @@ void SortIterator::ramExternalSort(){
     int maxCacheRunsInRAM = Config::ram_capacity / (Config::tt_buffer_size);
 
     // sort the RAM.txt currently in memory(un-spilled runs)
-    cout<<"Sorting the in-memory run"<<endl;
+    cout<<"Sorting in-memory run"<<endl;
     assert(SortIterator::_ramUsed <= Config::ram_capacity && "*******Ram capacity is greater than allocated records**********");
     if(SortIterator::_ramUsed != Config::ram_capacity){
         int frac = SortIterator::_ramUsed % Config::tt_buffer_size;
-        if(frac!=0) frac = 1; // check if there any run less than 16 records (to know if we need to roundup)
-        int numRuns =  (SortIterator::_ramUsed / Config::tt_buffer_size) + frac;
-        ramMergeSort(numRuns);
+        if(frac!=0) frac = 1; // is there any run less than 16 records (to know if we need to roundup)
+        int numMergePerLevel =  (SortIterator::_ramUsed / Config::tt_buffer_size) + frac;
+        ramMergeSort(numMergePerLevel);
     } else{
         ramMergeSort(maxCacheRunsInRAM);
     } 
@@ -302,20 +401,26 @@ void SortIterator::ramExternalSort(){
             outFile.flush();
             cout<<"Writing spilled cache run "<< run <<" into RAM"<<endl;
             cacheRunCount++;
-            // if RAM is at capacity, perform merge sort
             if(cacheRunCount == maxCacheRunsInRAM ){
+                // outFile.close(); // since we are opening a ifstream to RAM.txt in ramMergeSort(), closing this ofstream
                 cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
                 cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
+                print_file_contents(ram);
                 ramMergeSort(cacheRunCount);
-
                 _numRAMRuns++;
+                
+
                 cacheRunCount=0;
+                // ofstream outFile(ram,ios::app); // back in business
+                // if (!outFile) {
+                //     cout << "Error: Could not open ofstream file " << ram << endl;
+                //     exit(1);
+                // }
             }
         }
         
         outFile.close();
         
-        // process anything remaining in the RAM
         if(cacheRunCount != 0){
             cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
             cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
@@ -326,7 +431,6 @@ void SortIterator::ramExternalSort(){
         }
     }
 
-    // Will be called if there are no runs in the buffer
     if(cacheRunCount != 0){
         cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
         cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
@@ -339,7 +443,6 @@ void SortIterator::ramExternalSort(){
     clearFile(temp_disk); 
     
 }
-
 
 // Generates cache size mini runs
 void SortIterator::generateCacheRuns(Row row, bool lastBatch){
@@ -366,6 +469,20 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
             q.pop(); // clear the queue and reuse
         }
         
+        // generate runs
+        // cout<<"Cache TT Input is:"<<endl;
+        // for(int i=0;i<tt_input.size();i++){
+        //     queue<string> tmp_q = tt_input[i]; //copy the original queue to the temporary queue
+        //     cout<<"Size of queue "<<i<<" is: "<<tmp_q.size() <<endl;
+
+
+        //     while (!tmp_q.empty())
+        //     {
+        //         string q_element = tmp_q.front();
+        //         std::cout << q_element <<" ";
+        //         tmp_q.pop();
+        //     } 
+        // }
         cache_tt.generate_runs(tt_input);
         
         // clear for next use
@@ -374,10 +491,114 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
         clearFile(cache);
         _cacheUsed = 0;
     }
-}
     
+    // don't write to cache.txt if last batch
+    if(lastBatch) return;
 
-/* ----------------------------------- DISK Merge Sort -------------------------------*/
+    // write record into cache
+    ofstream outfile(cache,ios::app);
+    if(!outfile.is_open()){
+        cerr<<"Issue with opening Cache.txt, exit\n";
+        exit(1);
+    }
+    outfile << row.getRow();
+    outfile.close();
+
+    ++ _consumed;
+    cout<<"Number of values consumed: "<<_consumed<<endl;
+    ++ _cacheUsed;
+}
+
+// move RAM buffer contents into a temp file in Disk
+void spillBufferToDisk(){
+    copyFileContents(ram_buffer, temp_disk,1);
+    clearFile(ram_buffer);
+    SortIterator::_bufferSpills++;
+}
+
+// move RAM contents to temp file in Disk
+void spillRAMToDisk(){
+    copyFileContents(ram, temp_disk,1);
+    cout<<"Printing RAM contents as it is flushed to disk:"<<endl;
+    print_file_contents(ram);
+    clearFile(ram);
+    SortIterator::_ramUsed=0;
+}
+
+void insertCacheRunsInRAM(string cacheRun){
+    if(cacheRun=="\n") return;
+    // if we have enough records in RAM.txt OR if its the last batch of records
+    if(SortIterator::_ramUsed == Config::ram_capacity){
+        // if buffer is full, spill to disk
+        if(SortIterator::_ramBufferUsed == Config::ram_buffer_capacity){
+            spillBufferToDisk();
+            SortIterator::_ramBufferUsed=0;
+        }
+        // else, write into RAM buffer 
+        ofstream ram_buffer_file(ram_buffer, ios::app);
+        if(!ram_buffer_file.is_open()){
+            cerr<<"Issue with opening RAM_buffer.txt, exit\n";
+            exit(1);
+        }
+        // add record in buffer
+        
+        ram_buffer_file << cacheRun;
+
+        // close the file
+        ram_buffer_file.close();
+        
+        SortIterator::_ramBufferUsed+=Config::tt_buffer_size;
+        return;
+    }
+
+    // Open RAM.txt
+    ofstream ram_file(ram, ios::app);
+    if(!ram_file.is_open()){
+        cerr<<"Issue with opening RAM.txt, exit\n";
+        exit(1);
+    }
+
+    // add run to RAM.txt - we do NOT put this in disk
+    cout<<"Cache run value: "<<cacheRun<<endl;
+    ram_file << cacheRun;
+
+    // close the file
+    ram_file.close();
+    SortIterator::_ramUsed += Config::tt_buffer_size;
+    cout<<"Number of records in RAM: "<<SortIterator::_ramUsed <<endl;
+}
+
+// function to flush data into disk when RAM reaches max size
+// ramRun = RAM TT Output buffer contents
+void insertRAMRunsInDisk(string ramRun){
+    // if(ramRun=="\n") {
+    //     cout<<"Returned newline(***************)"<<endl;
+    //     return;
+    // }
+    // Open RAM.txt
+    ofstream ram_file(temp_disk, ios::app);
+    if(!ram_file.is_open()){
+        cerr<<"Issue with opening RAM.txt, exit\n";
+        exit(1);
+    }
+
+    // add run to RAM.txt
+    cout<<"RAM run value: "<<ramRun<<endl;
+    ram_file << ramRun;
+
+    // close the file
+    ram_file.close();
+    // if(ramRun!="\n") {
+    //     SortIterator::_ramUsed += Config::tt_buffer_size;
+    //     cout<<"Number of records in RAM: "<<SortIterator::_ramUsed <<endl;
+    // }
+    
+    // if we have enough records in RAM.txt OR if its the last batch of records
+    // if(SortIterator::_ramUsed == Config::ram_capacity or ram_tt.is_empty()){    
+    //     spillRAMToDisk();
+    //     return;
+    // }
+}
 
 // sort the RAM-sized runs
 void SortIterator::diskExternalSort(){
@@ -404,13 +625,12 @@ void SortIterator::diskExternalSort(){
             cout<<"Breaking in Disk merge sort \n";
             break;
         }
-
-        int size = gdFactors.size();
-        for(int i=0;i<size;i++){
+        
+        for(int i=0;i<gdFactors.size();i++){
             vector<queue<string>>ram_tt_input;
-            int numQ = 0;
+            int tot_recs = 0;
             string run;
-            while(numQ< gdFactors[i] && getline(inFile,run,'\n') && !inFile.eof()){
+            while(ram_tt_input.size()< gdFactors[i] && getline(inFile,run,'\n') && !inFile.eof()){
                
                 cout<<"Run is: "<<run<<endl;
                 std::stringstream ss(run);
@@ -421,16 +641,16 @@ void SortIterator::diskExternalSort(){
                     q.push(record);
                     numRecords++;
                 }
+                tot_recs += numRecords;
                 ram_tt_input.push_back(q);
-                numQ++;
                 cout<<"Number of records in this run: "<<numRecords<<endl;
                 
             }
             // inFile.close();
             if(!ram_tt_input.empty()){
+                cout<<"Number of inputs sent to TT : "<<ram_tt_input.size()<<"-------------- tot records : "<<tot_recs<<endl;
                 disk_tt.generate_runs(ram_tt_input);
                 ram_tt_input.clear();
-                numQ=0;
             }
             
         }
