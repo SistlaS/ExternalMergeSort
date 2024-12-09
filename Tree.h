@@ -66,6 +66,7 @@ class Tree{
 		Node pop_winner();
 		void generate_runs(vector<queue<string>> input);
 		void flush_to_op(bool eof);
+		Node get_next_record(uint winner_ind);
 
 		//utility funcs
 		bool is_empty();

@@ -6,7 +6,7 @@ int ROW_SIZE = Config::column_count;
 int BUFFER_SIZE = Config::tt_buffer_size;
 bool DEBUG_ = Config::DEBUG_;
 
-
+// ************UTIL METHODS*********************
 vector<int> convertToInt(const string& str) {
     vector<int> result;
     stringstream ss(str);
@@ -18,6 +18,18 @@ vector<int> convertToInt(const string& str) {
     return result;
 }
 
+bool greater_row_comparisons(int& offset, const std::vector<Node>& nodes) {
+    while (offset < ROW_SIZE) {
+        if (nodes[0].getData(offset) != nodes[1].getData(offset)) {
+            return nodes[0].getData(offset) > nodes[1].getData(offset);
+        }
+        offset++;
+    }
+    if (offset == ROW_SIZE) return true;
+    return false;
+}
+// ***********************************************
+// ************NODE METHODS*********************
 string Node::getDataStr(){
 	for (int num : Data) {
         if (num == INT_MAX) {
@@ -58,24 +70,13 @@ bool Node::is_greater(Node incoming){
 	return true;
 }
 
-bool greater(int& offset, const std::vector<Node>& nodes) {
-    while (offset < ROW_SIZE) {
-        if (nodes[0].getData(offset) != nodes[1].getData(offset)) {
-            return nodes[0].getData(offset) > nodes[1].getData(offset);
-        }
-        offset++;
-    }
-    if (offset == ROW_SIZE) return true;
-    return false;
-}
-
 bool Node::greater(Node& other, bool full_, vector<Node>& heap){
 	int offset;
 
 	bool isGreater;
 	if ((ovc == -1)|| (other.ovc == -1)){
 		offset = 0;
-		isGreater = ::greater(offset, { *this, other });
+		isGreater = ::greater_row_comparisons(offset, { *this, other });
 	}else{
 		if (ovc != other.ovc){
 			if (DEBUG_){
@@ -84,11 +85,8 @@ bool Node::greater(Node& other, bool full_, vector<Node>& heap){
         	return ovc < other.ovc;  // Compare OVC directly if they differ
 		}else{
 			//do row comparison
-			if (DEBUG_){
-				cout<<"OVC is same"<<endl;
-			}
 			offset = ovc;
-			isGreater = ::greater(offset, { *this, other });
+			isGreater = ::greater_row_comparisons(offset, { *this, other });
 		}
 	}
 
@@ -96,18 +94,17 @@ bool Node::greater(Node& other, bool full_, vector<Node>& heap){
     if (DEBUG_){
     	cout<<"Loser node in ovc comparison -- ";
     	loser.printNode();
-		
     }
     if (loser.Data[0] == INT_MAX){
         offset = -1;
-        if (DEBUG_) cout<<"Setting ovc for "<<loser.getIndex()<<","<<offset<<endl;
         return isGreater;
     }
-    if (DEBUG_) cout<<"Setting ovc for "<<loser.getIndex()<<","<<offset<<endl;
+
     loser.setOvc(offset);
 	heap[loser.getIndex()].setOvc(offset);
     return isGreater;
 }
+// ***********************************************
 
 //capacity here refers to the number of records the tree the can handle
 //for internal sort this is assumed to be equal to the leaf size for simplicity
@@ -132,7 +129,11 @@ Tree::Tree(uint k, string opFilename){
     }
 }
 
-Tree::~Tree() {}
+Tree::~Tree() {
+    heap.clear();
+    opBuffer.clear();
+    input.clear();
+}
 
 void Tree::print_tree() {
         cout << "Leaf nodes: " << leaf_nodes << ", Total nodes: " << capacity << endl;
@@ -162,7 +163,7 @@ void Tree::setOpFilename(string file){
 
 void Tree::construct_tree(){
 	//initialise the leaf nodes
-	int input_size = input.size();
+	uint input_size = input.size();
 
 	if (input_size > leaf_nodes){
 		cout<<"number of records to be sorted is larger than the number of nodes "<<input_size<<"---"<<leaf_nodes<<endl;
@@ -178,7 +179,7 @@ void Tree::construct_tree(){
 	// Populate the leaf nodes
     uint index = leaf_nodes;
     Node temp;
-    for (int i = 0; i < leaf_nodes; ++i, ++index) {
+    for (uint i = 0; i < leaf_nodes; ++i, ++index) {
         if(input[i].empty()){
             temp = Node({INT_MAX}, index);
         }else{
@@ -186,32 +187,25 @@ void Tree::construct_tree(){
             temp = Node(rec, index);
             input[i].pop();
         }
-        // temp.printNode();
         heap[index] = temp;
     }
-    // print_tree();
     //populate the internal nodes
-    for (int i = leaf_nodes; i < capacity; i++){
+    for (uint i = leaf_nodes; i < capacity; i++){
 
 		Node current = heap[i];
 		uint parent_indx = parent_index(i);
 
 		while(parent_indx >=0){
-			// cout<<" i : "<<i<<" parent_indx : "<<parent_indx<<" current : "<<current.Data<< " parent_data : "<<heap[parent_indx].Data<<endl;
-			bool ovc_comp = current.greater(heap[parent_indx], false, heap);
-            // bool act_comp = current.is_greater(heap[parent_indx]);
             if (heap[parent_indx].getData()[0] == INT_MIN){
 				heap[parent_indx] = current;
 				break;
-			}else if (ovc_comp){
+			}else if (current.greater(heap[parent_indx], false, heap)){
 				swap(heap[parent_indx], current);
 			}
-            // print_tree();
 			if (parent_indx == 0) { break; }
 			parent_indx = parent_index(parent_indx);
 		}
 	}
-    // print_tree();
 	if (DEBUG_) print_tree();
 }
 
@@ -228,17 +222,10 @@ void checkQueueSizes(std::vector<std::queue<std::string>>& input) {
         std::cout << "Queue " << i << " size: " << input[i].size() << std::endl;
     }
 }
-
-Node Tree::pop_winner() {
-    // Save the winner (root of the tree)
-    heap[0].setOvc(-1);
-    Node winner = heap[0];
-    uint winner_index = winner.getIndex();
-    // Replace the leaf node corresponding to the winner with a new record
-    // For an internal sort, insert INT_MAX; otherwise, use the next record
+// returns the next input from the queue where the previous winner came from
+Node Tree::get_next_record(uint winner_index){
+    uint ip_queue_no = winner_index-leaf_nodes;
     Node new_rec;
-    int ip_queue_no = winner_index-leaf_nodes;
-    // cout<<ip_queue_no<<" -- "<<input[ip_queue_no].front()<<endl;
     if (input[ip_queue_no].empty()) {
         new_rec = Node({INT_MAX}, winner_index);
     } else {
@@ -247,12 +234,22 @@ Node Tree::pop_winner() {
         new_rec = Node(rec, winner_index);
         input[ip_queue_no].pop();
     }
-    // cout<<"New rec ----- ";
-    // new_rec.printNode();
-    heap[winner_index] = new_rec;
+    return new_rec;
+}
+
+// pops the least record and updates the tree with a leaf to root pass using OVC for comparisons
+Node Tree::pop_winner() {
+    // Save the winner (root of the tree)
+    heap[0].setOvc(-1);
+    Node winner = heap[0];
+    uint winner_index = winner.getIndex();
+    // Replace the leaf node corresponding to the winner with a new record
+    // For an internal sort, insert INT_MAX; otherwise, use the next record
+    Node next_rec = get_next_record(winner_index);
+    heap[winner_index] = next_rec;
 
     // Start the propagation from the winner's index
-    Node current = new_rec;
+    Node current = next_rec;
     uint current_index = winner_index;
 
     // Propagate the new value up the tree
@@ -272,8 +269,8 @@ Node Tree::pop_winner() {
         }
         
         bool ovc_comp = current.greater(heap[parent_indx], false, heap);
-        bool act_comp = current.is_greater(heap[parent_indx]);
         if (DEBUG_){
+            bool act_comp = current.is_greater(heap[parent_indx]);
             if(ovc_comp != act_comp) cout<<ovc_comp<<"<- ovc---------------------------------------------------act ->"<<act_comp<<endl;
             // assert(ovc_comp == act_comp && "OVC comparison is different from row wise comparison");
         }
@@ -281,10 +278,6 @@ Node Tree::pop_winner() {
             // Current becomes the new loser, propagate the winner
             swap(current, heap[parent_indx]);
         }
-        // if (current.is_greater(heap[parent_indx])) {
-        //     // Current becomes the new loser, propagate the winner
-        //     swap(current, heap[parent_indx]);
-        // }
 		if (parent_indx == 0) { break; }
 		parent_indx = parent_index(parent_indx);
 	}
@@ -293,17 +286,15 @@ Node Tree::pop_winner() {
 
 void Tree::flush_to_op(bool eof){
 	//flush the buffer to op file
-    // cout<<"In flush : "<<opBuffer.size()<<endl;
     
     if (isRam){
-        
+        //write the buffer contents to the file
         ofstream outFile(opFilename, ios::app);
         if (!outFile) {
         std::cerr << "Error: Could not open the file for writing!" << std::endl;
         return;
         }
         for (size_t i = 0; i < opBuffer.size(); ++i) {
-            // cout<<opBuffer[i]<<endl;
             outFile << opBuffer[i] << "|";
         }
         if(eof){
@@ -311,12 +302,9 @@ void Tree::flush_to_op(bool eof){
         }
         outFile.close();
 
-        if (outFile.good()) {
-            // std::cout << "File written successfully to " << opFilename << std::endl;
-        } else {
+        if (!outFile.good()) {
             std::cerr << "Error occurred while writing to the file." << std::endl;
         }
-        //clear the buffer
         
     }else{
         string opString;
@@ -326,13 +314,10 @@ void Tree::flush_to_op(bool eof){
         if(eof){
             opString += '\n';
         }
-        // cout<<op
         insertCacheRunsInRAM(opString);
-        
-        
     }
+    //clear the buffer
     opBuffer.clear();
-    // cout<<"Cleared the buffer "<<endl;
 }
 
 void Tree::clear_heap(){
@@ -340,41 +325,32 @@ void Tree::clear_heap(){
 }
 
 void Tree::generate_runs(vector<queue<string>> input){
-    // construct_tree();
     this->input = input;
-    cout<<"**********************Input size : "<<input.size()<<"******************"<<endl;
-    // print_tree();
+    if (DEBUG_)cout<<"**********************Input size : "<<input.size()<<"******************"<<endl;
    int tot_recs = 0;
 
     construct_tree();
-    cout<<"_____________STARTING RUNS____________"<<endl;
+    if (DEBUG_)cout<<"_____________STARTING RUNS____________"<<endl;
 	while(!is_empty()){
     	Node temp = pop_winner();
     	if (DEBUG_)cout<<"*******popping : "<< temp.getDataStr()<<endl;
-    	// temp.printNode();
-        // cout<<temp.getDataStr();
         tot_recs += 1;
     	opBuffer.push_back(temp.getDataStr());
 
-    	if(opBuffer.size()==BUFFER_SIZE){ 
-            // cout<<"BEFORE FLUSHING_________"<<opBuffer.size()<<endl;
-            if (isRam ){
-               
-                    flush_to_op(false); 
+    	if(opBuffer.size()==BUFFER_SIZE){
+            if (isRam ){     
+                flush_to_op(false); 
             }
             else{
                 flush_to_op(true);
             }
-    		// tot_recs += BUFFER_SIZE;
-            // opBuffer.clear();
+            
     	}
     }
-    // print_tree();
-    // tot_recs += opBuffer.size();
     flush_to_op(true);
     
     clear_heap();
-    cout<<"*******************EOR********************** flushed # recs : "<<tot_recs<<endl;
+    if (DEBUG_)cout<<"*******************EOR********************** flushed # recs : "<<tot_recs<<endl;
 }
 
 // int main(int argc, char const *argv[])

@@ -341,7 +341,7 @@ void SortIterator::ramExternalSort(){
         while(getline(inFile,run,'\n') && !inFile.eof()){
             outFile << run<< "\n";
             outFile.flush();
-            cout<<"Writing spilled cache run "<< run <<" into RAM"<<endl;
+            // cout<<"Writing spilled cache run "<< run <<" into RAM"<<endl;
             cacheRunCount++;
             // process the buffer runs in RAM-size batches
             if(cacheRunCount == maxCacheRunsInRAM ){
@@ -430,10 +430,10 @@ void SortIterator::mergeSort(bool isDiskSort, int numRuns){
                 std::stringstream ss(run);
                 string record;
                 queue<string> q;
-                int numRecords=0;
+                // int numRecords=0;
                 while(getline(ss,record,'|')){
                     q.push(record);
-                    numRecords++;
+                    // numRecords++;
                 }
                 ram_tt_input.push_back(q);
                 numQ++;
