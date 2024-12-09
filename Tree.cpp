@@ -55,7 +55,7 @@ bool Node::is_greater(Node incoming){
 		}
 	}
 	
-	return false;
+	return true;
 }
 
 bool greater(int& offset, const std::vector<Node>& nodes) {
@@ -65,6 +65,7 @@ bool greater(int& offset, const std::vector<Node>& nodes) {
         }
         offset++;
     }
+    if (offset == ROW_SIZE) return true;
     return false;
 }
 
@@ -91,31 +92,20 @@ bool Node::greater(Node& other, bool full_, vector<Node>& heap){
 		}
 	}
 
-    // if (full_) {
-    //     offset = -1;  // Start offset for full comparison
-    // } else if (ovc != other.ovc && (ovc != -1) && (other.ovc != -1)) {
-    // 	cout<<"Direct comparison using ovc"<<ovc<<" -- "<<other.ovc<<endl;
-    //     return ovc < other.ovc;  // Compare OVC directly if they differ
-    // } else {
-    // 	cout<<"OVC is same comparison"<<endl;
-    //     offset = ovc;  // Start from the current offset-value coding
-    // }
-
-    // bool const isGreater = ::greater(offset, { *this, other });
-
     Node& loser = (isGreater ? *this : other);
     if (DEBUG_){
     	cout<<"Loser node in ovc comparison -- ";
     	loser.printNode();
-		cout<<"Setting ovc for "<<loser.getIndex()<<","<<offset<<endl;
+		
     }
     if (loser.Data[0] == INT_MAX){
         offset = -1;
+        if (DEBUG_) cout<<"Setting ovc for "<<loser.getIndex()<<","<<offset<<endl;
+        return isGreater;
     }
-    
+    if (DEBUG_) cout<<"Setting ovc for "<<loser.getIndex()<<","<<offset<<endl;
     loser.setOvc(offset);
 	heap[loser.getIndex()].setOvc(offset);
-    
     return isGreater;
 }
 
@@ -196,7 +186,7 @@ void Tree::construct_tree(){
         // temp.printNode();
         heap[index] = temp;
     }
-
+    // print_tree();
     //populate the internal nodes
     for (int i = leaf_nodes; i < capacity; i++){
 
@@ -205,12 +195,15 @@ void Tree::construct_tree(){
 
 		while(parent_indx >=0){
 			// cout<<" i : "<<i<<" parent_indx : "<<parent_indx<<" current : "<<current.Data<< " parent_data : "<<heap[parent_indx].Data<<endl;
-			if (heap[parent_indx].getData()[0] == INT_MIN){
+			bool ovc_comp = current.greater(heap[parent_indx], false, heap);
+            // bool act_comp = current.is_greater(heap[parent_indx]);
+            if (heap[parent_indx].getData()[0] == INT_MIN){
 				heap[parent_indx] = current;
 				break;
-			}else if (current.greater(heap[parent_indx], false, heap)){
+			}else if (ovc_comp){
 				swap(heap[parent_indx], current);
 			}
+            // print_tree();
 			if (parent_indx == 0) { break; }
 			parent_indx = parent_index(parent_indx);
 		}
@@ -226,7 +219,7 @@ bool Tree::is_empty(){
 	return false;
 }
 
-void checkQueueSizes(const std::vector<std::queue<std::string>>& input) {
+void checkQueueSizes(std::vector<std::queue<std::string>>& input) {
     std::cout << "Queue sizes: " << std::endl;
     for (size_t i = 0; i < input.size(); ++i) {
         std::cout << "Queue " << i << " size: " << input[i].size() << std::endl;
@@ -251,6 +244,7 @@ Node Tree::pop_winner() {
         new_rec = Node(rec, winner_index);
         input[ip_queue_no].pop();
     }
+    // cout<<"New rec ----- ";
     // new_rec.printNode();
     heap[winner_index] = new_rec;
 
@@ -315,7 +309,7 @@ void Tree::flush_to_op(bool eof){
         outFile.close();
 
         if (outFile.good()) {
-            std::cout << "File written successfully to " << opFilename << std::endl;
+            // std::cout << "File written successfully to " << opFilename << std::endl;
         } else {
             std::cerr << "Error occurred while writing to the file." << std::endl;
         }
@@ -335,7 +329,7 @@ void Tree::flush_to_op(bool eof){
         
     }
     opBuffer.clear();
-    cout<<"Cleared the buffer "<<endl;
+    // cout<<"Cleared the buffer "<<endl;
 }
 
 void Tree::clear_heap(){
@@ -350,9 +344,10 @@ void Tree::generate_runs(vector<queue<string>> input){
    int tot_recs = 0;
 
     construct_tree();
+    cout<<"_____________STARTING RUNS____________"<<endl;
 	while(!is_empty()){
     	Node temp = pop_winner();
-    	// cout<<"popping : "<< temp.getDataStr();
+    	if (DEBUG_)cout<<"*******popping : "<< temp.getDataStr()<<endl;
     	// temp.printNode();
         // cout<<temp.getDataStr();
         tot_recs += 1;
@@ -371,7 +366,7 @@ void Tree::generate_runs(vector<queue<string>> input){
             // opBuffer.clear();
     	}
     }
-    print_tree();
+    // print_tree();
     // tot_recs += opBuffer.size();
     flush_to_op(true);
     
@@ -383,57 +378,130 @@ void Tree::generate_runs(vector<queue<string>> input){
 // {
 //     vector<queue<string>> input;
 //     queue<string> q1;
+//     string s1 = "0, 5, 8, 2|0, 7, 1, 4|0, 8, 0, 8|1, 2, 8, 6|2, 1, 5, 0|2, 8, 9, 1|3, 1, 5, 0|3, 8, 9, 4|4, 0, 3, 2|4, 2, 6, 8|5, 1, 1, 1|5, 7, 9, 1|6, 5, 2, 7|7, 6, 9, 0|8, 2, 1, 8|9, 1, 2, 9|";
+//     std::stringstream ss(s1); // Create a stringstream from s1
+//     std::string token;
 
-//     q1.push("6, 10, 1, 7");
+//     // Use getline with delimiter '|'
+//     while (std::getline(ss, token, '|')) {
+//         if (!token.empty()) { // Avoid adding empty strings if any
+//             q1.push(token);
+//         }
+//     }
+//     // q1.push("6, 10, 1, 7");
 //     input.push_back(q1);
 
 //     queue<string> q2;
-//     q2.push("6, 4, 9, 6");
+//     string s2 = "0, 2, 3, 4|0, 8, 3, 5|2, 2, 1, 1|3, 2, 6, 2|3, 9, 0, 6|4, 0, 6, 5|4, 2, 8, 9|4, 6, 1, 9|6, 7, 9, 1|7, 6, 1, 5|7, 6, 6, 4|7, 9, 3, 8|9, 0, 6, 7|9, 2, 6, 6|9, 7, 7, 3|9, 8, 4, 5|";
+//     std::stringstream ss2(s2); // Create a stringstream from s1
+
+//     // Use getline with delimiter '|'
+//     while (std::getline(ss2, token, '|')) {
+//         if (!token.empty()) { // Avoid adding empty strings if any
+//             q2.push(token);
+//         }
+//     }
+//     // q2.push("6, 4, 9, 6");
 //     input.push_back(q2);
 
-//     // q1.push("2, 4, 3, 0");
-//     // q1.push("3, 0, 1, 3");
-//     // q1.push("5, 5, 3, 4");
-//     // input.push_back(q1);
-
-//     // queue<string> q2;
-//     // q2.push("2, 2, 0, 1");
-//     // q2.push("2, 4, 4, 5");
-//     // q2.push("4, 4, 8, 9");
-//     // input.push_back(q2);
-
-//     // queue<string> q3;
-//     // q3.push("4, 5, 0, 6");
-//     // q3.push("9, 8, 8, 6");
-//     // input.push_back(q3);
-
-//     // queue<string> q4;
-//     // q4.push("5,0,0,0,");
-//     // q4.push("5,0,3,0,");
-//     // input.push_back(q4);
-
-//     // queue<string> q5;
-//     // q5.push("6,1,10,3,");
-//     // q5.push("6,1,10,8,");
-//     // input.push_back(q5);
-//     uint n = 2;
-//     string outputFilename = "output.txt";
-
-//     Tree tree(n, "");
-//     tree.generate_runs(input);
-//     vector<queue<string>> input2;
 //     queue<string> q3;
+//     string s3 = "0, 0, 9, 1|2, 3, 1, 2|3, 3, 2, 8|3, 4, 9, 3|3, 7, 1, 1|4, 6, 5, 6|4, 7, 5, 6|5, 1, 2, 2|5, 9, 7, 7|5, 9, 9, 2|6, 1, 7, 8|6, 3, 0, 9|6, 5, 2, 7|6, 8, 2, 6|7, 2, 4, 7|9, 6, 3, 7|";
+//     std::stringstream ss3(s3); // Create a stringstream from s1
 
-//     q1.push("86, 10, 1, 22");
-//     input2.push_back(q3);
+//     // Use getline with delimiter '|'
+//     while (std::getline(ss3, token, '|')) {
+//         if (!token.empty()) { // Avoid adding empty strings if any
+//             q3.push(token);
+//         }
+//     }
+//     // q2.push("6, 4, 9, 6");
+//     input.push_back(q3);
+
 
 //     queue<string> q4;
-//     q2.push("16, 4, 9, 6");
-//     input2.push_back(q4);
+//     string s4 = "1, 4, 2, 3|1, 4, 4, 8|1, 5, 4, 9|1, 5, 5, 4|1, 8, 8, 2|3, 7, 5, 1|4, 7, 1, 0|5, 6, 1, 0|5, 8, 3, 7|6, 0, 4, 0|8, 6, 7, 3|9, 0, 1, 6|9, 1, 4, 9|9, 1, 8, 3|9, 8, 1, 0|9, 8, 5, 0|";
+//     std::stringstream ss4(s4); // Create a stringstream from s1
+
+//     // Use getline with delimiter '|'
+//     while (std::getline(ss4, token, '|')) {
+//         if (!token.empty()) { // Avoid adding empty strings if any
+//             q4.push(token);
+//         }
+//     }
+//     // q2.push("6, 4, 9, 6");
+//     input.push_back(q4);
+//     uint n = 4;
+//     string outputFilename = "output.txt";
+
+//     Tree tree(n, outputFilename);
 //     tree.generate_runs(input);
+//     // vector<queue<string>> input2;
+//     // queue<string> q3;
+
+//     // q1.push("86, 10, 1, 22");
+//     // input2.push_back(q3);
+
+//     // queue<string> q4;
+//     // q2.push("16, 4, 9, 6");
+//     // input2.push_back(q4);
+//     // tree.generate_runs(input);
 //     // Construct the tree
 //     // tree.construct_tree();
     
 //     tree.print_tree();
 //     return 0;
 // }
+
+// // int main(int argc, char const *argv[])
+// // {
+// //     vector<queue<string>> input;
+// //     queue<string> q1;
+    
+// //     q1.push("2, 4, 3, 0");
+// //     q1.push("3, 0, 1, 3");
+// //     // q1.push("5, 5, 3, 4");
+// //     input.push_back(q1);
+
+// //     queue<string> q2;
+// //     q2.push("2, 4, 3, 0");
+// //     q2.push("2, 4, 4, 5");
+// //     // q2.push("4, 4, 8, 9");
+// //     input.push_back(q2);
+
+// //     // queue<string> q3;
+// //     // q3.push("2, 4, 4, 6");
+// //     // q3.push("4, 5, 0, 6");
+// //     // q3.push("9, 8, 8, 6");
+// //     // input.push_back(q3);
+
+// //     // queue<string> q4;
+// //     // q4.push("5,0,0,0,");
+// //     // q4.push("5,0,3,0,");
+// //     // input.push_back(q4);
+
+// //     // queue<string> q5;
+// //     // q5.push("6,1,10,3,");
+// //     // q5.push("6,1,10,8,");
+// //     // input.push_back(q5);
+// //     uint n = 2;
+// //     string outputFilename = "output.txt";
+
+// //     Tree tree(n, outputFilename);
+// //     tree.generate_runs(input);
+// //     // vector<queue<string>> input2;
+// //     // queue<string> q3;
+
+// //     // q1.push("86, 10, 1, 22");
+// //     // input2.push_back(q3);
+
+// //     // queue<string> q4;
+// //     // q2.push("16, 4, 9, 6");
+// //     // input2.push_back(q4);
+// //     // tree.generate_runs(input);
+// //     // Construct the tree
+// //     // tree.construct_tree();
+    
+// //     tree.print_tree();
+// //     return 0;
+// // }
+
