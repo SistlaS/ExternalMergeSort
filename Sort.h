@@ -22,6 +22,7 @@ public:
     void generateCacheRuns(Row row, bool lastBatch);
     void ramExternalSort();
     void diskExternalSort();
+    void mergeSort(bool isDiskSort, int numRuns);
     static RowCount _ramUsed, _ramBufferUsed, _bufferSpills;
 private:
 	SortPlan const * const _plan;
