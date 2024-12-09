@@ -156,6 +156,9 @@ uint Tree::rightChild_index(uint index){
 	return 2*index+1;
 }
 
+void Tree::setOpFilename(string file){
+    opFilename = file;
+}
 
 void Tree::construct_tree(){
 	//initialise the leaf nodes
@@ -290,7 +293,7 @@ Node Tree::pop_winner() {
 
 void Tree::flush_to_op(bool eof){
 	//flush the buffer to op file
-    cout<<"In flush : "<<opBuffer.size()<<endl;
+    // cout<<"In flush : "<<opBuffer.size()<<endl;
     
     if (isRam){
         

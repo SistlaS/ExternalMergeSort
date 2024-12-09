@@ -74,6 +74,7 @@ class Tree{
 		uint rightChild_index(uint);
 		void print_tree();
 		void clear_heap();
+		void setOpFilename(string file);
 
 
 		~Tree();
