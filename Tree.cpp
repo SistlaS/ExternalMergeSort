@@ -3,7 +3,7 @@
 #include "Sort.h"
 
 int ROW_SIZE = Config::column_count;
-int BUFFER_SIZE = Config::cache_tt_buffer_size;
+int BUFFER_SIZE = Config::tt_buffer_size;
 bool DEBUG_ = Config::DEBUG_;
 
 
@@ -172,7 +172,7 @@ void Tree::construct_tree(){
 	int input_size = input.size();
 
 	if (input_size > leaf_nodes){
-		cout<<"number of records to be sorted is larger than the number of nodes"<<endl;
+		cout<<"number of records to be sorted is larger than the number of nodes "<<input_size<<"---"<<leaf_nodes<<endl;
 		return;
 	}
     //push empty queues if there are empty leaf nodes
@@ -294,17 +294,31 @@ Node Tree::pop_winner() {
     return winner;
 }
 
-void Tree::flush_to_op(bool eof){
+void Tree::flush_to_op(bool eof, bool isDisk){
 	//flush the buffer to op file
     cout<<"In flush : "<<opBuffer.size()<<endl;
+    
     if (isRam){
+        if(isDisk){
+            string opString;
+            for (size_t i = 0; i < opBuffer.size(); ++i) {
+                opString += opBuffer[i] + "|";
+            }
+            if(eof){
+                opString += '\n';
+            }
+            // cout<<op
+            insertRAMRunsInDisk(opString);
+            // opBuffer.clear();
+            return;
+        }
         ofstream outFile(opFilename, ios::app);
         if (!outFile) {
         std::cerr << "Error: Could not open the file for writing!" << std::endl;
         return;
         }
         for (size_t i = 0; i < opBuffer.size(); ++i) {
-            cout<<opBuffer[i]<<endl;
+            // cout<<opBuffer[i]<<endl;
             outFile << opBuffer[i] << "|";
         }
         if(eof){
@@ -329,32 +343,24 @@ void Tree::flush_to_op(bool eof){
         }
         // cout<<op
         insertCacheRunsInRAM(opString);
+        
+        
     }
-    opBuffer.clear();
+    // opBuffer.clear();
 }
 
 void Tree::clear_heap(){
     this->heap = std::vector<Node>(this->capacity);
 }
 
-void Tree::generate_runs(vector<queue<string>> input){
+void Tree::generate_runs(vector<queue<string>> input, bool isDisk){
     // construct_tree();
     this->input = input;
     cout<<"**********************Input size : "<<input.size()<<"******************"<<endl;
     // print_tree();
-   
+   int tot_recs = 0;
 
     construct_tree();
-    if(input.size() == 3){
-        for(int i = 0; i < input.size();i ++)  {
-            queue<string> temp = input[i];
-            while(!temp.empty()){
-                cout<<temp.front()<<"|";
-                temp.pop();
-            }
-        }
-        print_tree();
-    }
 	while(!is_empty()){
     	Node temp = pop_winner();
     	cout<<"popping : "<< temp.getDataStr();
@@ -364,30 +370,36 @@ void Tree::generate_runs(vector<queue<string>> input){
 
     	if(opBuffer.size()==BUFFER_SIZE){ 
             // cout<<"BEFORE FLUSHING_________"<<opBuffer.size()<<endl;
-            if (isRam){
-            flush_to_op(false);
-            }else{
-                flush_to_op(true);
+            if (isRam || isDisk){
+                if(isDisk){
+                    flush_to_op(false, true);
+                }else{
+                    flush_to_op(false, false);
+                }   
             }
-    		
+            else{
+                flush_to_op(true, false);
+            }
+    		tot_recs += BUFFER_SIZE;
+            opBuffer.clear();
     	}
     }
-    // if(input.size() == 3){
-    //     cout<<"Done popping, "<<opBuffer.size()<< endl;
-    // }
+    tot_recs += opBuffer.size();
+    flush_to_op(true, isDisk);
+    
+    
     // opBuffer.push_back(string(1, '\n'));
     // Final flush to ensure all data is written
     // cout<<"BEFORE FLUSHING_________FIN"<<opBuffer.size()<<endl;
-    flush_to_op(true);
     // if(!opBuffer.size()){
     //     cout<<"_____________________________________HERE"<<opBuffer.size()<<endl;
     //     flush_to_op(true);
-    // // if(!opBuffer.size()){
-    // //     cout<<"_____________________________________HERE"<<endl;
-    // //     flush_to_op(true);
+    // if(!opBuffer.size()){
+    //     cout<<"_____________________________________HERE"<<opBuffer.size()<<endl;
+    //     flush_to_op(true);
     // }
     clear_heap();
-    cout<<"*******************EOR**********************"<<endl;
+    cout<<"*******************EOR********************** flushed # recs : "<<tot_recs<<endl;
 }
 
 // int main(int argc, char const *argv[])

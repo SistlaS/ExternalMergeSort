@@ -64,8 +64,8 @@ class Tree{
 
 		void construct_tree();
 		Node pop_winner();
-		void generate_runs(vector<queue<string>> input);
-		void flush_to_op(bool eof);
+		void generate_runs(vector<queue<string>> input, bool isDisk);
+		void flush_to_op(bool eof, bool isDisk);
 
 		//utility funcs
 		bool is_empty();

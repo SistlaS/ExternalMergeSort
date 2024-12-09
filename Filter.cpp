@@ -61,7 +61,7 @@ bool FilterIterator::next (Row & row)
 
 	++ _produced;
     std::ofstream outFile("input.txt", std::ios::app);
-    cout<<"*****************FILTERED ROWS :"<<_produced<<endl;
+    // cout<<"*****************FILTERED ROWS :"<<_produced<<endl;
     if (!outFile) {
         std::cerr << "Error opening file for writing." << std::endl;
         return 1;
@@ -76,7 +76,7 @@ bool FilterIterator::next (Row & row)
     // Close the file
     outFile.close();
 
-    std::cout << "File written successfully." << std::endl;
+    // std::cout << "File written successfully." << std::endl;
 	
     return true;
 } // FilterIterator::next
