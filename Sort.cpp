@@ -280,81 +280,6 @@ void insertCacheRunsInRAM(string cacheRun){
 
 /*  -------------------- RAM & RAM->Disk ----------------------------*/
 
-// void ramMergeSort(int W){
-//     cout<<"Number of Cache size runs: "<<W<<endl;
-//     int numMergePerLevel = W;
-//     int mergeStep=1;
-//     // loop continues till all of Disk is merged into one sorted run
-//     while(true){
-
-//         // Open Disk.txt in input mode
-//         ifstream inFile(ram,ios::in);
-//         if (!inFile or !inFile.is_open()) {
-//             cout << "Error: Could not open ifstream file " << ram << endl;
-//             exit(1);
-//         }
-
-//         cout<<"!!!!!!!!!!!!!!!!!!!!!!At Merge Step: "<<mergeStep<<" !!!!!!!!!!!!!!!!!!!!!";
-
-//         vector<int> gdFactors = computeGracefulDegradationFactors(numMergePerLevel,Config::num_ram_TT_leaf_nodes);
-//         cout<<"GDFactors are:\n";
-//         for(auto x: gdFactors) {cout<<x<<" ";} cout<<endl;
-//         cout<<"Number of merges in this level: "<<numMergePerLevel; 
-
-//         int size=gdFactors.size();
-//         if(size==1 && gdFactors[0]==1) {
-//             cout<<"Breaking in ram merge sort \n";
-//             break;
-//         }
-        
-        
-//         for(int i=0;i<size;i++){
-//             vector<queue<string>>ram_tt_input;
-//             int numQ = 0;
-//             string run;
-//             while(numQ< gdFactors[i] && getline(inFile,run,'\n') && !inFile.eof()){
-               
-//                 cout<<"Run is: "<<run<<endl;
-//                 std::stringstream ss(run);
-//                 string record;
-//                 queue<string> q;
-//                 int numRecords=0;
-//                 while(getline(ss,record,'|')){
-//                     q.push(record);
-//                     numRecords++;
-//                 }
-//                 ram_tt_input.push_back(q);
-//                 numQ++;
-//                 cout<<"Number of records in this run: "<<numRecords<<endl;
-                
-//             }
-//             // inFile.close();
-//             if(!ram_tt_input.empty()){
-//                 ram_tt.generate_runs(ram_tt_input);
-//                 ram_tt_input.clear();
-//                 numQ=0;
-//             }
-            
-//         }
-
-//         cout<<"***************************DONE WITH MERGE LEVEL "<<mergeStep<<endl;
-//         inFile.close();
-
-//         clearFile(ram);
-
-//         copyFileContents(sorted_ram_output,ram,1);
-//         clearFile(sorted_ram_output);
-//         print_file_contents(ram);
-
-
-//         numMergePerLevel = gdFactors.size();
-//         mergeStep++;
-//     }
-//     copyFileContents(ram, disk, 1);
-//     clearFile(ram);
-//     clearFile(sorted_ram_output); 
-// }
-
 // Sort all cache-size runs into ram-size runs. Store this data into disk
 // Pulls data from RAM, RAM Buffer and from the temp disk storage
 void SortIterator::ramExternalSort(){
@@ -417,8 +342,6 @@ void SortIterator::ramExternalSort(){
             if(cacheRunCount == maxCacheRunsInRAM ){
                 cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
                 cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
-                print_file_contents(ram);
-                // ramMergeSort(cacheRunCount);
                 mergeSort(false,cacheRunCount);
 
                 _numRAMRuns++;
@@ -431,9 +354,7 @@ void SortIterator::ramExternalSort(){
         if(cacheRunCount != 0){
             cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
             cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
-            print_file_contents(ram);
             mergeSort(false,cacheRunCount);
-            // ramMergeSort(cacheRunCount);
             _numRAMRuns++;
             cacheRunCount=0;
         }
@@ -442,7 +363,6 @@ void SortIterator::ramExternalSort(){
     if(cacheRunCount != 0){
         cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
         cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
-        // ramMergeSort(cacheRunCount);
         mergeSort(false,cacheRunCount);
         _numRAMRuns++;
         cacheRunCount=0;
@@ -455,74 +375,7 @@ void SortIterator::ramExternalSort(){
 
 /*  ----------------------------------- Merge Sort ------------------------------------------------*/
 
-// // sort the RAM-sized runs
-// void SortIterator::diskExternalSort(){
-//     ram_tt.setOpFilename(temp_disk);
-//     cout<<"Number of RAM size runs: "<<_numRAMRuns<<endl;
-//     int numMergePerLevel = _numRAMRuns;
-//     int mergeStep=1;
-//     // loop continues till all of Disk is merged into one sorted run
-//     while(true){
-
-//         // Open Disk.txt in input mode
-//         ifstream inFile(disk,ios::in);
-//         if (!inFile or !inFile.is_open()) {
-//             cout << "Error: Could not open ifstream file " << disk << endl;
-//             exit(1);
-//         }
-
-//         cout<<"!!!!!!!!!!!!!!!!!!!!!!At Merge Step: "<<mergeStep<<" !!!!!!!!!!!!!!!!!!!!!";
-
-//         vector<int> gdFactors = computeGracefulDegradationFactors(numMergePerLevel,Config::num_ram_TT_leaf_nodes);
-//         cout<<"GDFactors are:\n";
-//         for(auto x: gdFactors) {cout<<x<<" ";} cout<<endl;
-//         cout<<"Number of merges in this level: "<<numMergePerLevel; 
-//         int size=gdFactors.size();
-//         if(size==1 && gdFactors[0]==1) {
-//             cout<<"Breaking in Disk merge sort \n";
-//             break;
-//         }
-        
-//         for(int i=0;i<size;i++){
-//             vector<queue<string>>ram_tt_input;
-//             int numQ=0;
-//             string run;
-//             while(numQ < gdFactors[i] && getline(inFile,run,'\n') && !inFile.eof()){
-               
-//                 std::stringstream ss(run);
-//                 string record;
-//                 queue<string> q;
-//                 int numRecords=0;
-//                 while(getline(ss,record,'|')){
-//                     q.push(record);
-//                     numRecords++;
-//                 }
-//                 ram_tt_input.push_back(q);
-//                 numQ++;
-//             }
-
-//             ram_tt.generate_runs(ram_tt_input);
-//             ram_tt_input.clear();
-//             numQ=0;
-            
-//         }
-
-//         cout<<"***************************DONE WITH MERGE LEVEL "<<mergeStep<<endl;
-//         inFile.close();
-
-//         clearFile(disk);
-
-//         copyFileContents(temp_disk,disk,1);
-//         clearFile(temp_disk);
-//         print_file_contents(disk);
-
-//         numMergePerLevel = gdFactors.size();
-//         mergeStep++;
-//     }
-
-// }
-
-// sort the RAM-sized runs
+// sort the Cache/RAM-sized runs
 void SortIterator::mergeSort(bool isDiskSort, int numRuns){
     if(isDiskSort){
         ram_tt.setOpFilename(temp_disk);
