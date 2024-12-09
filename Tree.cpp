@@ -294,24 +294,12 @@ Node Tree::pop_winner() {
     return winner;
 }
 
-void Tree::flush_to_op(bool eof, bool isDisk){
+void Tree::flush_to_op(bool eof){
 	//flush the buffer to op file
     cout<<"In flush : "<<opBuffer.size()<<endl;
     
     if (isRam){
-        if(isDisk){
-            string opString;
-            for (size_t i = 0; i < opBuffer.size(); ++i) {
-                opString += opBuffer[i] + "|";
-            }
-            if(eof){
-                opString += '\n';
-            }
-            // cout<<op
-            insertRAMRunsInDisk(opString);
-            // opBuffer.clear();
-            return;
-        }
+        
         ofstream outFile(opFilename, ios::app);
         if (!outFile) {
         std::cerr << "Error: Could not open the file for writing!" << std::endl;
@@ -346,14 +334,14 @@ void Tree::flush_to_op(bool eof, bool isDisk){
         
         
     }
-    // opBuffer.clear();
+    opBuffer.clear();
 }
 
 void Tree::clear_heap(){
     this->heap = std::vector<Node>(this->capacity);
 }
 
-void Tree::generate_runs(vector<queue<string>> input, bool isDisk){
+void Tree::generate_runs(vector<queue<string>> input){
     // construct_tree();
     this->input = input;
     cout<<"**********************Input size : "<<input.size()<<"******************"<<endl;
@@ -363,41 +351,29 @@ void Tree::generate_runs(vector<queue<string>> input, bool isDisk){
     construct_tree();
 	while(!is_empty()){
     	Node temp = pop_winner();
-    	cout<<"popping : "<< temp.getDataStr();
+    	// cout<<"popping : "<< temp.getDataStr();
     	// temp.printNode();
         // cout<<temp.getDataStr();
+        tot_recs += 1;
     	opBuffer.push_back(temp.getDataStr());
 
     	if(opBuffer.size()==BUFFER_SIZE){ 
             // cout<<"BEFORE FLUSHING_________"<<opBuffer.size()<<endl;
-            if (isRam || isDisk){
-                if(isDisk){
-                    flush_to_op(false, true);
-                }else{
-                    flush_to_op(false, false);
-                }   
+            if (isRam ){
+               
+                    flush_to_op(false); 
             }
             else{
-                flush_to_op(true, false);
+                flush_to_op(true);
             }
-    		tot_recs += BUFFER_SIZE;
-            opBuffer.clear();
+    		// tot_recs += BUFFER_SIZE;
+            // opBuffer.clear();
     	}
     }
-    tot_recs += opBuffer.size();
-    flush_to_op(true, isDisk);
+    print_tree();
+    // tot_recs += opBuffer.size();
+    flush_to_op(true);
     
-    
-    // opBuffer.push_back(string(1, '\n'));
-    // Final flush to ensure all data is written
-    // cout<<"BEFORE FLUSHING_________FIN"<<opBuffer.size()<<endl;
-    // if(!opBuffer.size()){
-    //     cout<<"_____________________________________HERE"<<opBuffer.size()<<endl;
-    //     flush_to_op(true);
-    // if(!opBuffer.size()){
-    //     cout<<"_____________________________________HERE"<<opBuffer.size()<<endl;
-    //     flush_to_op(true);
-    // }
     clear_heap();
     cout<<"*******************EOR********************** flushed # recs : "<<tot_recs<<endl;
 }
