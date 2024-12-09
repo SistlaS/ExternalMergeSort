@@ -349,14 +349,15 @@ void Tree::generate_runs(vector<queue<string>> input){
         for(int i = 0; i < input.size();i ++)  {
             queue<string> temp = input[i];
             while(!temp.empty()){
-                cout<<temp.front()<<",";
+                cout<<temp.front()<<"|";
                 temp.pop();
             }
-        }  
+        }
+        print_tree();
     }
 	while(!is_empty()){
     	Node temp = pop_winner();
-    	cout<<"popping :";
+    	cout<<"popping : "<< temp.getDataStr();
     	// temp.printNode();
         // cout<<temp.getDataStr();
     	opBuffer.push_back(temp.getDataStr());
@@ -371,16 +372,20 @@ void Tree::generate_runs(vector<queue<string>> input){
     		
     	}
     }
+    // if(input.size() == 3){
+    //     cout<<"Done popping, "<<opBuffer.size()<< endl;
+    // }
     // opBuffer.push_back(string(1, '\n'));
     // Final flush to ensure all data is written
     // cout<<"BEFORE FLUSHING_________FIN"<<opBuffer.size()<<endl;
-    if(!opBuffer.size()){
-        cout<<"_____________________________________HERE"<<opBuffer.size()<<endl;
-        flush_to_op(true);
+    flush_to_op(true);
     // if(!opBuffer.size()){
-    //     cout<<"_____________________________________HERE"<<endl;
+    //     cout<<"_____________________________________HERE"<<opBuffer.size()<<endl;
     //     flush_to_op(true);
-    }
+    // // if(!opBuffer.size()){
+    // //     cout<<"_____________________________________HERE"<<endl;
+    // //     flush_to_op(true);
+    // }
     clear_heap();
     cout<<"*******************EOR**********************"<<endl;
 }

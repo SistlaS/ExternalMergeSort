@@ -315,7 +315,7 @@ void SortIterator::ramExternalSort(){
             cout<<"Writing spilled cache run "<< run <<" into RAM"<<endl;
             cacheRunCount++;
             if(cacheRunCount == maxCacheRunsInRAM ){
-                outFile.close(); // since we are opening a ifstream to RAM.txt in ramMergeSort(), closing this ofstream
+                // outFile.close(); // since we are opening a ifstream to RAM.txt in ramMergeSort(), closing this ofstream
                 cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
                 cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
                 print_file_contents(ram);
@@ -324,11 +324,11 @@ void SortIterator::ramExternalSort(){
                 
 
                 cacheRunCount=0;
-                ofstream outFile(ram,ios::app); // back in business
-                if (!outFile) {
-                    cout << "Error: Could not open ofstream file " << ram << endl;
-                    exit(1);
-                }
+                // ofstream outFile(ram,ios::app); // back in business
+                // if (!outFile) {
+                //     cout << "Error: Could not open ofstream file " << ram << endl;
+                //     exit(1);
+                // }
             }
         }
         
