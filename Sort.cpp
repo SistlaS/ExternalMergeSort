@@ -104,6 +104,37 @@ Iterator * SortPlan::init () const
 } // SortPlan::init
 
 /* ------------------------- SortIterator -----------------------------*/
+std::string removeLastColumn(const std::string& input) {
+    if (input.empty()) {
+        return input; // If input is empty, return as is
+    }
+    
+    size_t lastComma = input.find_last_of(','); // Find the last comma
+    if (lastComma == std::string::npos) {
+        return ""; // If no comma is found, return an empty string
+    }
+    
+    return input.substr(0, lastComma); // Return the substring before the last comma
+}
+void cleanOVCFromDisk(){
+    ifstream inFile(disk, ios::in);
+    if (!inFile) {
+        cout << "Error: Could not open ifstream file " << cache << endl;
+        exit(1);
+    }
+    ofstream outFile;
+    outFile.open("Output.txt", ios::out); // overwrite mode
+    if (!outFile) {
+        cout << "Error: Could not open destination file Output.tx" << endl;
+        exit(1);
+    }
+    string token;
+    while(getline(inFile, token, '|')){
+        string data = removeLastColumn(token);
+        outFile<<data<<"|";
+    }
+    return;
+}
 
 SortIterator::SortIterator (SortPlan const * const plan) :
 	_plan (plan), _input (plan->_input->init ()),
@@ -145,13 +176,16 @@ SortIterator::SortIterator (SortPlan const * const plan) :
     //Step 5: sort the RAM sized runs into final sorted run
     mergeSort(true,_numRAMRuns);
 
+    //clean Disk.txt to remove last column
+    cleanOVCFromDisk();
+
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double, milli> elapsed = end - start;
 	cout << "***************Execution time for exeternal merge sort: " << elapsed.count() << " ms ***************"<<endl;
 	traceprintf ("%s consumed %lu rows\n",
 			_plan->_name,
 			(unsigned long) (_consumed));
-    outFile.open("Disk.txt");
+    outFile.open("Output.txt");
 } // SortIterator::SortIterator
 
 SortIterator::~SortIterator ()

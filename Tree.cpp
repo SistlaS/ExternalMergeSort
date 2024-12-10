@@ -16,6 +16,7 @@ vector<int> convertToInt(const string& str) {
         result.push_back(stoi(temp)); 
     }
     return result;
+
 }
 
 bool greater_row_comparisons(int& offset, const std::vector<Node>& nodes) {
@@ -47,6 +48,7 @@ string Node::getDataStr(){
     return oss.str();
 }
 
+
 void Node::printNode() {
         std::cout << "Node(Index: " << Index
                   << ", Data: [";
@@ -70,22 +72,64 @@ bool Node::is_greater(Node incoming){
 	return true;
 }
 
+void Node::writeOvcToRec(int offset){
+    if (Data[0] == INT_MAX){
+        setOvc(-1);
+        return;
+    }
+    setOvc(offset);
+    //modify the existing ovc
+    if(Data.size() > ROW_SIZE){
+        Data.back() = offset;
+    }else if(Data.size() == ROW_SIZE){
+        Data.push_back(offset);
+    }
+    return;
+}
+
+int Node::getOVCFromRec(){
+    int _ovc;
+    if(Data.size() > ROW_SIZE){
+        _ovc = Data.back();
+    }else if(Data.size() == ROW_SIZE){
+        _ovc = this->ovc;
+        writeOvcToRec(_ovc);
+        // heap[loser.getIndex()].writeOvcToRec(offset);
+    }else{
+        // INT_MAX rec
+        if(Data[0] != INT_MAX){
+            traceprintf("ooopppppppppssssss check");
+        }
+        _ovc = -1;
+    }
+    return _ovc;
+}
+
+
+
 bool Node::greater(Node& other, bool full_, vector<Node>& heap){
 	int offset;
 
 	bool isGreater;
-	if ((ovc == -1)|| (other.ovc == -1)){
+    int curr_ovc = getOVCFromRec();
+    int other_ovc = other.getOVCFromRec();
+	if ((curr_ovc == -1)|| (other_ovc == -1)){
 		offset = 0;
 		isGreater = ::greater_row_comparisons(offset, { *this, other });
 	}else{
-		if (ovc != other.ovc){
+		if (curr_ovc != other_ovc){
 			if (DEBUG_){
-				cout<<"Direct comparison using ovc"<<ovc<<" -- "<<other.ovc<<" ;; res = "<< (ovc <other.ovc)<<endl;	
+				cout<<"Direct comparison using ovc"<<curr_ovc<<" -- "<<other_ovc<<" ;; res = "<< (curr_ovc <other_ovc)<<endl;	
 			}
-        	return ovc < other.ovc;  // Compare OVC directly if they differ
+            Node loser = (curr_ovc < other_ovc )? *this : other;
+            if (DEBUG_){
+                cout<<"Loser node in ovc comparison -- ";
+                loser.printNode();
+            }
+        	return curr_ovc < other_ovc;  // Compare OVC directly if they differ
 		}else{
 			//do row comparison
-			offset = ovc;
+			offset = curr_ovc;
 			isGreater = ::greater_row_comparisons(offset, { *this, other });
 		}
 	}
@@ -95,13 +139,16 @@ bool Node::greater(Node& other, bool full_, vector<Node>& heap){
     	cout<<"Loser node in ovc comparison -- ";
     	loser.printNode();
     }
-    if (loser.Data[0] == INT_MAX){
-        offset = -1;
-        return isGreater;
-    }
+    loser.writeOvcToRec(offset);
+    heap[loser.getIndex()].writeOvcToRec(offset);
+    // if (loser.Data[0] == INT_MAX){
+    //     offset = -1;
+    //     return isGreater;
+    // }
 
-    loser.setOvc(offset);
-	heap[loser.getIndex()].setOvc(offset);
+
+    // loser.setOvc(offset);
+	// heap[loser.getIndex()].setOvc(offset);
     return isGreater;
 }
 // ***********************************************
@@ -240,7 +287,7 @@ Node Tree::get_next_record(uint winner_index){
 // pops the least record and updates the tree with a leaf to root pass using OVC for comparisons
 Node Tree::pop_winner() {
     // Save the winner (root of the tree)
-    heap[0].setOvc(-1);
+    // heap[0].setOvc(-1);
     Node winner = heap[0];
     uint winner_index = winner.getIndex();
     // Replace the leaf node corresponding to the winner with a new record
@@ -267,7 +314,10 @@ Node Tree::pop_winner() {
 	        cout<<"parent ind : ";
 	        heap[parent_indx].printNode();
         }
-        
+        if (parent_indx == 0) { 
+            swap(current, heap[parent_indx]);
+            break; 
+        }
         bool ovc_comp = current.greater(heap[parent_indx], false, heap);
         if (DEBUG_){
             bool act_comp = current.is_greater(heap[parent_indx]);
@@ -278,7 +328,7 @@ Node Tree::pop_winner() {
             // Current becomes the new loser, propagate the winner
             swap(current, heap[parent_indx]);
         }
-		if (parent_indx == 0) { break; }
+		
 		parent_indx = parent_index(parent_indx);
 	}
     return winner;
@@ -335,8 +385,12 @@ void Tree::generate_runs(vector<queue<string>> input){
     	Node temp = pop_winner();
     	if (DEBUG_)cout<<"*******popping : "<< temp.getDataStr()<<endl;
         tot_recs += 1;
-    	opBuffer.push_back(temp.getDataStr());
+        opBuffer.push_back(temp.getDataStr());
+    	
         int size = opBuffer.size();
+        // print_tree();
+        // cout<<"-------------------------------------------------"<<endl;
+
     	if(size==BUFFER_SIZE){
             if (isRam ){     
                 flush_to_op(false); 
@@ -431,56 +485,57 @@ void Tree::generate_runs(vector<queue<string>> input){
 //     return 0;
 // }
 
-// // int main(int argc, char const *argv[])
-// // {
-// //     vector<queue<string>> input;
-// //     queue<string> q1;
+// int main(int argc, char const *argv[])
+// {
+//     vector<queue<string>> input;
+//     queue<string> q1;
     
-// //     q1.push("2, 4, 3, 0");
-// //     q1.push("3, 0, 1, 3");
-// //     // q1.push("5, 5, 3, 4");
-// //     input.push_back(q1);
+//     q1.push("2, 4, 3, 0");
+//     // q1.push("3, 0, 1, 3");
+//     // q1.push("5, 5, 3, 4");
+//     input.push_back(q1);
 
-// //     queue<string> q2;
-// //     q2.push("2, 4, 3, 0");
-// //     q2.push("2, 4, 4, 5");
-// //     // q2.push("4, 4, 8, 9");
-// //     input.push_back(q2);
+//     queue<string> q2;
+//     // q2.push("2, 4, 3, 0");
+//     q2.push("2, 4, 4, 5");
+//     // q2.push("4, 4, 8, 9");
+//     input.push_back(q2);
 
-// //     // queue<string> q3;
-// //     // q3.push("2, 4, 4, 6");
-// //     // q3.push("4, 5, 0, 6");
-// //     // q3.push("9, 8, 8, 6");
-// //     // input.push_back(q3);
+//     queue<string> q3;
+//     q3.push("2, 4, 4, 6");
+//     // q3.push("4, 5, 0, 6");
+//     // q3.push("9, 8, 8, 6");
+//     input.push_back(q3);
 
-// //     // queue<string> q4;
-// //     // q4.push("5,0,0,0,");
-// //     // q4.push("5,0,3,0,");
-// //     // input.push_back(q4);
+//     queue<string> q4;
+//     q4.push("5,0,0,0,");
+//     // q4.push("5,0,3,0,");
+//     input.push_back(q4);
 
-// //     // queue<string> q5;
-// //     // q5.push("6,1,10,3,");
-// //     // q5.push("6,1,10,8,");
-// //     // input.push_back(q5);
-// //     uint n = 2;
-// //     string outputFilename = "output.txt";
+//     queue<string> q5;
+//     // q5.push("6,1,10,3,");
+//     q5.push("6,1,10,8,");
+//     input.push_back(q5);
+//     uint n = 5;
+//     string outputFilename = "output.txt";
 
-// //     Tree tree(n, outputFilename);
-// //     tree.generate_runs(input);
-// //     // vector<queue<string>> input2;
-// //     // queue<string> q3;
+//     Tree tree(n, outputFilename);
+//     tree.generate_runs(input);
+//     // vector<queue<string>> input2;
+//     // queue<string> q3;
 
-// //     // q1.push("86, 10, 1, 22");
-// //     // input2.push_back(q3);
+//     // q1.push("86, 10, 1, 22");
+//     // input2.push_back(q3);
 
-// //     // queue<string> q4;
-// //     // q2.push("16, 4, 9, 6");
-// //     // input2.push_back(q4);
-// //     // tree.generate_runs(input);
-// //     // Construct the tree
-// //     // tree.construct_tree();
+//     // queue<string> q4;
+
+//     // q2.push("16, 4, 9, 6");
+//     // input2.push_back(q4);
+//     // tree.generate_runs(input);
+//     // Construct the tree
+//     // tree.construct_tree();
     
-// //     tree.print_tree();
-// //     return 0;
-// // }
+//     tree.print_tree();
+//     return 0;
+// }
 

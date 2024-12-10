@@ -55,7 +55,7 @@ void WitnessIterator::computeXOR(Row & row, int &XOR){
 	while (getline(ss, number, ',')) {
 		XOR ^= stoi(number); // Convert to integer and XOR
 	}
-	// cout<<"computing Xor for row : "<<row.row<< " value :"<< XOR<<endl;
+	cout<<"computing Xor for row : "<<row.row<< " value :"<< XOR<<endl;
 	// cout<<ipXOR << " -- "<< opXOR<<endl;
 
 	// cout<<"computing XOR"<<endl;
@@ -82,5 +82,10 @@ bool WitnessIterator::next (Row & row)
 void WitnessIterator::free (Row & row)
 {
 	TRACE (true);
+
+	// cout<<"***"<<_input->next(row)<<endl;
+	if (!_input->next(row)){
+		cout<<"***************XOR BEFORE************ "<<ipXOR<<endl;
+	}
 	_input->free (row);
 } // WitnessIterator::free
