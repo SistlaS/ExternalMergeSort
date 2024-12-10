@@ -52,6 +52,9 @@ public:
 	void run ();
 	virtual bool next (Row & row) = 0;
 	virtual void free (Row & row) = 0;
+	int ipXOR = 0;
+	int opXOR = 0;
 private:
 	RowCount _rows;
+
 }; // class Iterator

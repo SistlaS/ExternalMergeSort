@@ -3,8 +3,10 @@
 #include "Tree.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <queue>
 #include <vector>
+#include <chrono>
 
 using namespace std;
 
@@ -105,7 +107,7 @@ Iterator * SortPlan::init () const
 
 SortIterator::SortIterator (SortPlan const * const plan) :
 	_plan (plan), _input (plan->_input->init ()),
-	_consumed (0), _produced (0)
+	_consumed (0), _produced (0), _currentLine("0")
 {
 	TRACE (true);
     // High-Level Overview of the Sort Algorithm:
@@ -117,6 +119,9 @@ SortIterator::SortIterator (SortPlan const * const plan) :
     // Step 5: Once all records are sorted ino RAM-sized runs, we perform external merge sort algorithm on them and finally process into a single sorted run, which is returned to the user
 	
     // Steps 1 & 2
+
+    auto start = chrono::high_resolution_clock::now();
+
     for (Row row;  _input->next (row);  _input->free (row)){
         generateCacheRuns(row,false);
     }
@@ -134,10 +139,14 @@ SortIterator::SortIterator (SortPlan const * const plan) :
 
     //Step 5: sort the RAM sized runs into final sorted run
     mergeSort(true,_numRAMRuns);
-	
+
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double, milli> elapsed = end - start;
+	cout << "***************Execution time for exeternal merge sort: " << elapsed.count() << " ms ***************"<<endl;
 	traceprintf ("%s consumed %lu rows\n",
 			_plan->_name,
 			(unsigned long) (_consumed));
+    outFile.open("Disk.txt");
 } // SortIterator::SortIterator
 
 SortIterator::~SortIterator ()
@@ -155,6 +164,13 @@ bool SortIterator::next (Row & row)
 	TRACE (true); 
 	if (_produced >= _consumed)  return false;
 	++ _produced;
+	if (outFile.is_open())
+	{
+		if (getline(outFile, _currentLine, '|'))
+		{
+			row.setRow(_currentLine);
+		}
+	}	
 	return true;
 } // SortIterator::next
 

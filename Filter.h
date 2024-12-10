@@ -16,6 +16,7 @@ class FilterIterator : public Iterator
 public:
 	FilterIterator (FilterPlan const * const plan);
 	~FilterIterator ();
+	bool isFiltered(Row & row);
 	bool next (Row & row);
 	void free (Row & row);
 private:

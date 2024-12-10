@@ -18,6 +18,8 @@ public:
 	~WitnessIterator ();
 	bool next (Row & row);
 	void free (Row & row);
+	void computeXOR(Row & row, int &XOR);
+
 private:
 	WitnessPlan const * const _plan;
 	Iterator * const _input;

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <sstream>
 
 FilterPlan::FilterPlan (char const * const name, Plan * const input)
 	: Plan (name), _input (input)
@@ -40,6 +41,25 @@ FilterIterator::~FilterIterator ()
 			(unsigned long) (_consumed));
 } // FilterIterator::~FilterIterator
 
+// Filter to remove rows that have column values < 2
+bool FilterIterator::isFiltered(Row & row) {
+    string data = row.row;
+    if (!data.empty() && data.back() == '|') {
+        data.pop_back();
+    }
+    stringstream ss(data);
+    string number;
+
+    while (getline(ss, number, ',')) {
+        try {
+            if (stoi(number) < 2) return false;
+        } catch (const exception &e) {
+            cerr << "Error: Invalid number format in row: " << number << "\n";
+        }
+    }
+    return true;
+}
+
 bool FilterIterator::next (Row & row)
 {
 	TRACE (true);
@@ -49,9 +69,13 @@ bool FilterIterator::next (Row & row)
 		if ( ! _input->next (row))  return false;
 
 		++ _consumed;
-		if (_consumed % 2 != 0) // the fake filter predicate
+		// if (_consumed % 2 != 0) // the fake filter predicate
+		// 	break;
+        
+        if (isFiltered(row)) // the fake filter predicate
 			break;
         
+
         temp.push_back(row.row);
 		_input->free (row);
 
