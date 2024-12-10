@@ -13,7 +13,7 @@ using namespace std;
 // TT - Tournament tree
 string cache = "Cache.txt"; // store the input records before it is pushed as the Cache TT input
 string ram = "RAM.txt";     // store the cache-size runs in memory
-string ram_buffer = "RAM2.txt"; // buffer for RAM.txt, we spill buffer into SSD for graceful degradation
+// string ram_buffer = "RAM2.txt"; // buffer for RAM.txt, we spill buffer into SSD for graceful degradation
 string sorted_ram_output = "RAM3.txt"; // storing the output of the RAM TT in this temp file for implementation convinience; not considered for memory calculations
 string disk = "Disk.txt";   // Store the final sorted output here
 string temp_disk = "Disk2.txt"; // Store the spilled cache-size runs in a temp file in disk
@@ -24,8 +24,9 @@ Tree cache_tt(Config::num_cache_TT_leaf_nodes,"");
 Tree ram_tt(Config::num_ram_TT_leaf_nodes,sorted_ram_output);
 
 RowCount SortIterator::_bufferSpills = 0;
-RowCount SortIterator::_ramBufferUsed = 0;
+// RowCount SortIterator::_ramBufferUsed = 0;
 RowCount SortIterator::_ramUsed = 0;
+priority_queue<string,vector<string>,greater<string>> ramBuffer; // simulate RAMBuffer with this priority queue(min-heap)
 
 
 /* --------------------------------- File management helper functions --------------------------------------- */
@@ -256,9 +257,16 @@ void SortIterator::generateCacheRuns(Row row, bool lastBatch){
 }
 
 // move RAM buffer contents into a temp file in Disk
-void spillBufferToDisk(){
-    copyFileContents(ram_buffer, temp_disk,1);
-    clearFile(ram_buffer);
+void spillRunToDisk(string cacheRun){
+    // copyFileContents(ram_buffer, temp_disk,1);
+    // clearFile(ram_buffer);
+    ofstream outFile(temp_disk,ios::app);
+    if(!outFile){
+        cerr<<"Issue with opening Disk2.txt, exit\n";
+        exit(1);
+    }
+    outFile<<cacheRun;
+    outFile.close();
     SortIterator::_bufferSpills++;
 }
 
@@ -269,23 +277,24 @@ void insertCacheRunsInRAM(string cacheRun){
 
     // if we have enough records in RAM.txt OR if its the last batch of records
     if(SortIterator::_ramUsed == Config::ram_capacity){
-        // if buffer is full, spill to disk
-        if(SortIterator::_ramBufferUsed == Config::ram_buffer_capacity){
-            spillBufferToDisk();
-            SortIterator::_ramBufferUsed=0;
+        // if buffer is full, spill smallest record to disk
+        if(ramBuffer.size()==Config::ram_buffer_capacity){
+            string run = ramBuffer.top();
+            ramBuffer.pop();
+            spillRunToDisk(run);
         }
-        // else, write into RAM buffer 
-        ofstream ram_buffer_file(ram_buffer, ios::app);
-        if(!ram_buffer_file.is_open()){
-            cerr<<"Issue with opening RAM_buffer.txt, exit\n";
-            exit(1);
-        }
+        ramBuffer.push(cacheRun); 
+        // ofstream ram_buffer_file(ram_buffer, ios::app);
+        // if(!ram_buffer_file.is_open()){
+        //     cerr<<"Issue with opening RAM_buffer.txt, exit\n";
+        //     exit(1);
+        // }
 
-        // add record in buffer
-        ram_buffer_file << cacheRun;
-        ram_buffer_file.close();
+        // // add record in buffer
+        // ram_buffer_file << cacheRun;
+        // ram_buffer_file.close();
         
-        SortIterator::_ramBufferUsed+=Config::tt_buffer_size;
+        // SortIterator::_ramBufferUsed+=Config::tt_buffer_size;
         return;
     }
 
@@ -332,13 +341,25 @@ void SortIterator::ramExternalSort(){
 
     
     // First process the runs in the buffer if any - place them into the RAM.txt
-    if(SortIterator::_ramBufferUsed!=0){
-        copyFileContents(ram_buffer,ram,1);
-        cacheRunCount += (SortIterator::_ramBufferUsed/Config::tt_buffer_size);
+    if(!ramBuffer.empty()){
+        // copyFileContents(ram_buffer,ram,1);
+        cacheRunCount += ramBuffer.size();
+
+        ofstream outFile(ram, ios::app);
+        if (!outFile) {
+            cout << "Error: Could not open ofstream file " << ram << endl;
+            exit(1);
+        }
+
+        while(!ramBuffer.empty()){
+            outFile << ramBuffer.top();
+            ramBuffer.pop();
+        }
+
         cout<<"Number of runs in the RAM buffer "<<cacheRunCount<<endl;
         print_file_contents(ram);
-        clearFile(ram_buffer);
-        SortIterator::_ramBufferUsed=0;
+        // clearFile(ram_buffer);
+        // SortIterator::_ramBufferUsed=0;
     }
 
     // Next process the runs in the disk if any - place them into the RAM.txt

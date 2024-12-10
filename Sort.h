@@ -38,5 +38,5 @@ private:
 }; // class SortIterator
 
 void insertCacheRunsInRAM(string cacheRun);
-void spillBufferToDisk();
+void spillRunToDisk(string cacheRun);
 
