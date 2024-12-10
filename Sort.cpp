@@ -279,9 +279,9 @@ void insertCacheRunsInRAM(string cacheRun){
     if(SortIterator::_ramUsed == Config::ram_capacity){
         // if buffer is full, spill smallest record to disk
         if(ramBuffer.size()==Config::ram_buffer_capacity){
-            string run = ramBuffer.top();
+            string run = ramBuffer.top(); // RAM buffer is a min-heap which has the smallest run at the top of the heap
             ramBuffer.pop();
-            spillRunToDisk(run);
+            spillRunToDisk(run); // we spill smallest run to disk
         }
         ramBuffer.push(cacheRun); 
         // ofstream ram_buffer_file(ram_buffer, ios::app);
