@@ -336,8 +336,8 @@ void Tree::generate_runs(vector<queue<string>> input){
     	if (DEBUG_)cout<<"*******popping : "<< temp.getDataStr()<<endl;
         tot_recs += 1;
     	opBuffer.push_back(temp.getDataStr());
-
-    	if(opBuffer.size()==BUFFER_SIZE){
+        int size = opBuffer.size();
+    	if(size==BUFFER_SIZE){
             if (isRam ){     
                 flush_to_op(false); 
             }
