@@ -110,7 +110,12 @@ SortIterator::SortIterator (SortPlan const * const plan) :
 	_consumed (0), _produced (0), _currentLine("0")
 {
 	TRACE (true);
+
+    // to enable multiple runs of executable w/o manually deleting old results
+    clearFile(disk);
+
     // High-Level Overview of the Sort Algorithm:
+
     // Step 1: as each row enters into memory, we add it into the Cache.
     // Step 2: once Cache reaches capacity, we generate miniruns and send it to RAM
     // Step 3: if RAM reaches capacity, we spill the cache-size miniruns - first into a buffer located within RAM, and finally to a location in disk.
@@ -423,16 +428,16 @@ void SortIterator::mergeSort(bool isDiskSort, int numRuns){
             exit(1);
         }
 
-        cout<<"!!!!!!!!!!!!!!!!!!!!!!At Merge Step: "<<mergeLevel<<" !!!!!!!!!!!!!!!!!!!!!";
+        cout<<"!!!!!!!!!!!!!!!!!!!!!!    At Merge Step: "<< mergeLevel <<" !!!!!!!!!!!!!!!!!!!!!\n";
 
         vector<int> gdFactors = computeGracefulDegradationFactors(numRuns,Config::num_ram_TT_leaf_nodes);
-        cout<<"GDFactors are:\n";
+        cout<<"The GDFactors are:\n";
         for(auto x: gdFactors) {cout<<x<<" ";} cout<<endl;
-        cout<<"Number of merges in this level: "<<numRuns; 
+        cout<<"Number of merges in this level: "<<numRuns<<endl; 
         int size=gdFactors.size();
         if(size==1 && gdFactors[0]==1) {
-            string errMsg = isDiskSort? "Merge completed for DiskSort!!\n" : "Merge completed for RAMSort!!\n"; 
-            cout<<errMsg;
+            string breakMsg = isDiskSort? "Merge completed for DiskSort!!\n" : "Merge completed for RAMSort!!\n"; 
+            cout<<breakMsg;
             break;
         }
         
@@ -446,10 +451,8 @@ void SortIterator::mergeSort(bool isDiskSort, int numRuns){
                 std::stringstream ss(run);
                 string record;
                 queue<string> q;
-                // int numRecords=0;
                 while(getline(ss,record,'|')){
                     q.push(record);
-                    // numRecords++;
                 }
                 ram_tt_input.push_back(q);
                 numQ++;
@@ -463,7 +466,7 @@ void SortIterator::mergeSort(bool isDiskSort, int numRuns){
             numQ=0;            
         }
 
-        cout<<"***************************DONE WITH MERGE LEVEL "<<mergeLevel<<endl;
+        cout<<"***************************  DONE WITH MERGE LEVEL "<<mergeLevel<<" ******************************"<<endl;
         inFile.close();
 
         // prepare the file to receive the sorted rows
