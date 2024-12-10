@@ -69,18 +69,14 @@ bool FilterIterator::next (Row & row)
 		if ( ! _input->next (row))  return false;
 
 		++ _consumed;
-		// if (_consumed % 2 != 0) // the fake filter predicate
-		// 	break;
-        
-        if (isFiltered(row)) // the fake filter predicate
+		if (_consumed % 2 != 0) // the fake filter predicate
 			break;
         
-
+        // if (isFiltered(row)) // the fake filter predicate
+		// 	break;
+        
         temp.push_back(row.row);
 		_input->free (row);
-
-        
-
 	}
 
 	++ _produced;

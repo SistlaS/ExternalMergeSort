@@ -33,29 +33,34 @@ WitnessIterator::~WitnessIterator ()
 {
 	TRACE (true);
 
-	cout<<"**********XOR AFTER SORT************"<< opXOR<<endl;
+	cout<<"**********************************STATS**************************************"<<endl;
 
 	delete _input;
 
+	cout<<"XOR : "<<XOR<<endl;
 
 	//read disk here and xor
 
 	traceprintf ("%s witnessed %lu rows\n",
 			_plan->_name,
 			(unsigned long) (_rows));
+	cout<<"************************************************************************"<<endl;
+
 } // WitnessIterator::~WitnessIterator
 
-void WitnessIterator::computeXOR(Row & row, int &XOR){
+void WitnessIterator::computeXOR(Row & row){
 	string data = row.row;
 	// cout<<row.row<<endl;
 	
 	if(data.back() == '|') data.pop_back();
 	stringstream ss(data);
 	string number;
-	while (getline(ss, number, ',')) {
+	int ct = 0;
+	while (getline(ss, number, ',') && ct < Config::column_count) {
 		XOR ^= stoi(number); // Convert to integer and XOR
+		ct += 1;
 	}
-	cout<<"computing Xor for row : "<<row.row<< " value :"<< XOR<<endl;
+	// cout<<"computing Xor for row : "<<row.row<< " value :"<< XOR<<endl;
 	// cout<<ipXOR << " -- "<< opXOR<<endl;
 
 	// cout<<"computing XOR"<<endl;
@@ -63,29 +68,24 @@ void WitnessIterator::computeXOR(Row & row, int &XOR){
 }
 
 bool WitnessIterator::next (Row & row)
+
 {
 	TRACE (true);
 
 	if ( ! _input->next (row))  return false;
-	if(_plan->_name == "input") {
-		computeXOR(row, ipXOR);
-	}else{
-		computeXOR(row, opXOR);
-	}
-
-	
-	// cout<<row.row<<" -----in witness next "<<endl;
+	computeXOR(row);
 	++ _rows;
 	return true;
 } // WitnessIterator::next
+
 
 void WitnessIterator::free (Row & row)
 {
 	TRACE (true);
 
 	// cout<<"***"<<_input->next(row)<<endl;
-	if (!_input->next(row)){
-		cout<<"***************XOR BEFORE************ "<<ipXOR<<endl;
-	}
+	// if (!_input->next(row)){
+	// 	cout<<"***************XOR BEFORE************ "<<XOR<<endl;
+	// }
 	_input->free (row);
 } // WitnessIterator::free

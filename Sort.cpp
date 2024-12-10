@@ -185,7 +185,7 @@ SortIterator::SortIterator (SortPlan const * const plan) :
 	traceprintf ("%s consumed %lu rows\n",
 			_plan->_name,
 			(unsigned long) (_consumed));
-    outFile.open("Output.txt");
+    outFile.open("Disk.txt");
 } // SortIterator::SortIterator
 
 SortIterator::~SortIterator ()
@@ -202,14 +202,16 @@ bool SortIterator::next (Row & row)
 {
 	TRACE (true); 
 	if (_produced >= _consumed)  return false;
-	++ _produced;
+	
 	if (outFile.is_open())
 	{
 		if (getline(outFile, _currentLine, '|'))
 		{
+            cout<<"bbbb  "<<_currentLine<<endl;
 			row.setRow(_currentLine);
 		}
-	}	
+	}
+    ++ _produced;
 	return true;
 } // SortIterator::next
 
@@ -465,9 +467,9 @@ void SortIterator::mergeSort(bool isDiskSort, int numRuns){
         cout<<"!!!!!!!!!!!!!!!!!!!!!!    At Merge Step: "<< mergeLevel <<" !!!!!!!!!!!!!!!!!!!!!\n";
 
         vector<int> gdFactors = computeGracefulDegradationFactors(numRuns,Config::num_ram_TT_leaf_nodes);
-        cout<<"The GDFactors are:\n";
+        // cout<<"The GDFactors are:\n";
         for(auto x: gdFactors) {cout<<x<<" ";} cout<<endl;
-        cout<<"Number of merges in this level: "<<numRuns<<endl; 
+        // cout<<"Number of merges in this level: "<<numRuns<<endl; 
         int size=gdFactors.size();
         if(size==1 && gdFactors[0]==1) {
             string breakMsg = isDiskSort? "Merge completed for DiskSort!!\n" : "Merge completed for RAMSort!!\n"; 
