@@ -142,6 +142,13 @@ SortIterator::SortIterator (SortPlan const * const plan) :
 {
 	TRACE (true);
 
+    printf("*************** SYSTEM CONFIGURATION USED ***************\n");
+    printf("RAM CAPACITY : %llu \n", Config::ram_capacity);
+    printf("BUFFER CAPACITY : %llu \n", Config::ram_buffer_capacity);
+    printf("CACHE CAPACITY : %llu \n", Config::num_cache_TT_leaf_nodes);
+    printf("**********************************************************\n");
+
+
     // to enable multiple runs of executable w/o manually deleting old results
     clearFile(disk);
 
@@ -161,6 +168,7 @@ SortIterator::SortIterator (SortPlan const * const plan) :
     for (Row row;  _input->next (row);  _input->free (row)){
         generateCacheRuns(row,false);
     }
+    delete _input;
 
     // process all unprocessed not processed till now
     if(_cacheUsed!=0){
@@ -207,7 +215,6 @@ bool SortIterator::next (Row & row)
 	{
 		if (getline(outFile, _currentLine, '|'))
 		{
-            cout<<"bbbb  "<<_currentLine<<endl;
 			row.setRow(_currentLine);
 		}
 	}
@@ -372,7 +379,7 @@ void SortIterator::ramExternalSort(){
         copyFileContents(ram_buffer,ram,1);
         cacheRunCount += (SortIterator::_ramBufferUsed/Config::tt_buffer_size);
         cout<<"Number of runs in the RAM buffer "<<cacheRunCount<<endl;
-        print_file_contents(ram);
+        // print_file_contents(ram);
         clearFile(ram_buffer);
         SortIterator::_ramBufferUsed=0;
     }
@@ -394,7 +401,7 @@ void SortIterator::ramExternalSort(){
         }
 
         string run;
-        cout<<"Start processing the spilled runs\n";
+        // cout<<"Start processing the spilled runs\n";
         while(getline(inFile,run,'\n') && !inFile.eof()){
             outFile << run<< "\n";
             outFile.flush();
@@ -402,8 +409,8 @@ void SortIterator::ramExternalSort(){
             cacheRunCount++;
             // process the buffer runs in RAM-size batches
             if(cacheRunCount == maxCacheRunsInRAM ){
-                cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
-                cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
+                // cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
+                // cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
                 mergeSort(false,cacheRunCount);
 
                 _numRAMRuns++;
@@ -415,8 +422,8 @@ void SortIterator::ramExternalSort(){
         
         // if there are any unprocessed runs remaining, or if total # of spilled runs < maxCacheRunsInRAM, control flows here
         if(cacheRunCount != 0){
-            cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
-            cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
+            // cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
+            // cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
             mergeSort(false,cacheRunCount);
             _numRAMRuns++;
             cacheRunCount=0;
@@ -425,8 +432,8 @@ void SortIterator::ramExternalSort(){
 
     // if buffer was not empty && there are no spilled runs, control flows here
     if(cacheRunCount != 0){
-        cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
-        cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
+        // cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
+        // cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
         mergeSort(false,cacheRunCount);
         _numRAMRuns++;
         cacheRunCount=0;
@@ -443,9 +450,9 @@ void SortIterator::ramExternalSort(){
 void SortIterator::mergeSort(bool isDiskSort, int numRuns){
     if(isDiskSort){
         ram_tt.setOpFilename(temp_disk);
-        cout<<"Number of RAM size runs: "<<numRuns<<endl;
+        // cout<<"Number of RAM size runs: "<<numRuns<<endl;
     } else{
-        cout<<"Number of Cache size runs: "<<numRuns<<endl;
+        // cout<<"Number of Cache size runs: "<<numRuns<<endl;
     }
 
     
@@ -464,16 +471,16 @@ void SortIterator::mergeSort(bool isDiskSort, int numRuns){
             exit(1);
         }
 
-        cout<<"!!!!!!!!!!!!!!!!!!!!!!    At Merge Step: "<< mergeLevel <<" !!!!!!!!!!!!!!!!!!!!!\n";
+        // cout<<"!!!!!!!!!!!!!!!!!!!!!!    At Merge Step: "<< mergeLevel <<" !!!!!!!!!!!!!!!!!!!!!\n";
 
         vector<int> gdFactors = computeGracefulDegradationFactors(numRuns,Config::num_ram_TT_leaf_nodes);
         // cout<<"The GDFactors are:\n";
-        for(auto x: gdFactors) {cout<<x<<" ";} cout<<endl;
+        // for(auto x: gdFactors) {cout<<x<<" ";} cout<<endl;
         // cout<<"Number of merges in this level: "<<numRuns<<endl; 
         int size=gdFactors.size();
         if(size==1 && gdFactors[0]==1) {
             string breakMsg = isDiskSort? "Merge completed for DiskSort!!\n" : "Merge completed for RAMSort!!\n"; 
-            cout<<breakMsg;
+            // cout<<breakMsg;
             break;
         }
         
@@ -502,7 +509,7 @@ void SortIterator::mergeSort(bool isDiskSort, int numRuns){
             numQ=0;            
         }
 
-        cout<<"***************************  DONE WITH MERGE LEVEL "<<mergeLevel<<" ******************************"<<endl;
+        // cout<<"***************************  DONE WITH MERGE LEVEL "<<mergeLevel<<" ******************************"<<endl;
         inFile.close();
 
         // prepare the file to receive the sorted rows

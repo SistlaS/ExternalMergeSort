@@ -18,8 +18,12 @@ public:
 	~WitnessIterator ();
 	bool next (Row & row);
 	void free (Row & row);
-	void computeXOR(Row & row);
-	int XOR;
+	void computeXOR(vector<int> data);
+	void countInversions(vector<int> data);
+	uint64_t XOR;
+	uint64_t _inversions;
+	bool _hasPrevious;
+	vector<int> _previous;
 
 private:
 	WitnessPlan const * const _plan;
