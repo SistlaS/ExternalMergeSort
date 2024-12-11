@@ -41,9 +41,12 @@ class Node{
 	    int getData(int i) const { return Data[i]; }
 	    void setData(const vector<int> data) { Data = data; }
 	    string getDataStr();
+		string getDataStrWithoutOVC();
+		int getOVCFromRec();
 
 	    int getOvc() const { return ovc; }
 	    void setOvc(int ovc_value) { ovc = ovc_value; }
+		void writeOvcToRec(int offset);
 
 	    void printNode();
 };

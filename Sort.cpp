@@ -105,12 +105,50 @@ Iterator * SortPlan::init () const
 } // SortPlan::init
 
 /* ------------------------- SortIterator -----------------------------*/
+std::string removeLastColumn(const std::string& input) {
+    if (input.empty()) {
+        return input; // If input is empty, return as is
+    }
+    
+    size_t lastComma = input.find_last_of(','); // Find the last comma
+    if (lastComma == std::string::npos) {
+        return ""; // If no comma is found, return an empty string
+    }
+    
+    return input.substr(0, lastComma); // Return the substring before the last comma
+}
+void cleanOVCFromDisk(){
+    ifstream inFile(disk, ios::in);
+    if (!inFile) {
+        cout << "Error: Could not open ifstream file " << cache << endl;
+        exit(1);
+    }
+    ofstream outFile;
+    outFile.open("Output.txt", ios::out); // overwrite mode
+    if (!outFile) {
+        cout << "Error: Could not open destination file Output.tx" << endl;
+        exit(1);
+    }
+    string token;
+    while(getline(inFile, token, '|')){
+        string data = removeLastColumn(token);
+        outFile<<data<<"|";
+    }
+    return;
+}
 
 SortIterator::SortIterator (SortPlan const * const plan) :
 	_plan (plan), _input (plan->_input->init ()),
 	_consumed (0), _produced (0), _currentLine("0")
 {
 	TRACE (true);
+
+    printf("*************** SYSTEM CONFIGURATION USED ***************\n");
+    printf("RAM CAPACITY : %llu \n", Config::ram_capacity);
+    printf("BUFFER CAPACITY : %llu \n", Config::ram_buffer_capacity);
+    printf("CACHE CAPACITY : %llu \n", Config::num_cache_TT_leaf_nodes);
+    printf("**********************************************************\n");
+
 
     // to enable multiple runs of executable w/o manually deleting old results
     clearFile(disk);
@@ -131,6 +169,7 @@ SortIterator::SortIterator (SortPlan const * const plan) :
     for (Row row;  _input->next (row);  _input->free (row)){
         generateCacheRuns(row,false);
     }
+    delete _input;
 
     // process all unprocessed not processed till now
     if(_cacheUsed!=0){
@@ -145,6 +184,9 @@ SortIterator::SortIterator (SortPlan const * const plan) :
 
     //Step 5: sort the RAM sized runs into final sorted run
     mergeSort(true,_numRAMRuns);
+
+    //clean Disk.txt to remove last column
+    cleanOVCFromDisk();
 
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double, milli> elapsed = end - start;
@@ -169,14 +211,15 @@ bool SortIterator::next (Row & row)
 {
 	TRACE (true); 
 	if (_produced >= _consumed)  return false;
-	++ _produced;
+	
 	if (outFile.is_open())
 	{
 		if (getline(outFile, _currentLine, '|'))
 		{
 			row.setRow(_currentLine);
 		}
-	}	
+	}
+    ++ _produced;
 	return true;
 } // SortIterator::next
 
@@ -379,7 +422,7 @@ void SortIterator::ramExternalSort(){
         }
 
         string run;
-        cout<<"Start processing the spilled runs\n";
+        // cout<<"Start processing the spilled runs\n";
         while(getline(inFile,run,'\n') && !inFile.eof()){
             outFile << run<< "\n";
             outFile.flush();
@@ -387,8 +430,8 @@ void SortIterator::ramExternalSort(){
             cacheRunCount++;
             // process the buffer runs in RAM-size batches
             if(cacheRunCount == maxCacheRunsInRAM ){
-                cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
-                cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
+                // cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
+                // cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
                 mergeSort(false,cacheRunCount);
 
                 _numRAMRuns++;
@@ -400,8 +443,8 @@ void SortIterator::ramExternalSort(){
         
         // if there are any unprocessed runs remaining, or if total # of spilled runs < maxCacheRunsInRAM, control flows here
         if(cacheRunCount != 0){
-            cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
-            cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
+            // cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
+            // cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
             mergeSort(false,cacheRunCount);
             _numRAMRuns++;
             cacheRunCount=0;
@@ -410,8 +453,8 @@ void SortIterator::ramExternalSort(){
 
     // if buffer was not empty && there are no spilled runs, control flows here
     if(cacheRunCount != 0){
-        cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
-        cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
+        // cout<<"Number of remaining cache runs to be processed: "<<cacheRunCount<<endl;
+        // cout<<"Starting RAM run number: "<< _numRAMRuns+1 <<"\n";
         mergeSort(false,cacheRunCount);
         _numRAMRuns++;
         cacheRunCount=0;
@@ -428,9 +471,9 @@ void SortIterator::ramExternalSort(){
 void SortIterator::mergeSort(bool isDiskSort, int numRuns){
     if(isDiskSort){
         ram_tt.setOpFilename(temp_disk);
-        cout<<"Number of RAM size runs: "<<numRuns<<endl;
+        // cout<<"Number of RAM size runs: "<<numRuns<<endl;
     } else{
-        cout<<"Number of Cache size runs: "<<numRuns<<endl;
+        // cout<<"Number of Cache size runs: "<<numRuns<<endl;
     }
 
     
@@ -449,16 +492,16 @@ void SortIterator::mergeSort(bool isDiskSort, int numRuns){
             exit(1);
         }
 
-        cout<<"!!!!!!!!!!!!!!!!!!!!!!    At Merge Step: "<< mergeLevel <<" !!!!!!!!!!!!!!!!!!!!!\n";
+        // cout<<"!!!!!!!!!!!!!!!!!!!!!!    At Merge Step: "<< mergeLevel <<" !!!!!!!!!!!!!!!!!!!!!\n";
 
         vector<int> gdFactors = computeGracefulDegradationFactors(numRuns,Config::num_ram_TT_leaf_nodes);
-        cout<<"The GDFactors are:\n";
-        for(auto x: gdFactors) {cout<<x<<" ";} cout<<endl;
-        cout<<"Number of merges in this level: "<<numRuns<<endl; 
+        // cout<<"The GDFactors are:\n";
+        // for(auto x: gdFactors) {cout<<x<<" ";} cout<<endl;
+        // cout<<"Number of merges in this level: "<<numRuns<<endl; 
         int size=gdFactors.size();
         if(size==1 && gdFactors[0]==1) {
             string breakMsg = isDiskSort? "Merge completed for DiskSort!!\n" : "Merge completed for RAMSort!!\n"; 
-            cout<<breakMsg;
+            // cout<<breakMsg;
             break;
         }
         
@@ -487,7 +530,7 @@ void SortIterator::mergeSort(bool isDiskSort, int numRuns){
             numQ=0;            
         }
 
-        cout<<"***************************  DONE WITH MERGE LEVEL "<<mergeLevel<<" ******************************"<<endl;
+        // cout<<"***************************  DONE WITH MERGE LEVEL "<<mergeLevel<<" ******************************"<<endl;
         inFile.close();
 
         // prepare the file to receive the sorted rows

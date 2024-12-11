@@ -63,10 +63,11 @@ bool FilterIterator::isFiltered(Row & row) {
 bool FilterIterator::next (Row & row)
 {
 	TRACE (true);
-    vector<string> temp;
+    // vector<string> temp;
 	for (;;)
 	{
-		if ( ! _input->next (row))  return false;
+		if ( ! _input->next (row)) {
+            return false;}
 
 		++ _consumed;
 		// if (_consumed % 2 != 0) // the fake filter predicate
@@ -75,30 +76,26 @@ bool FilterIterator::next (Row & row)
         if (isFiltered(row)) // the fake filter predicate
 			break;
         
-
-        temp.push_back(row.row);
+        // temp.push_back(row.row);
 		_input->free (row);
-
-        
-
 	}
 
 	++ _produced;
-    std::ofstream outFile("input.txt", std::ios::app);
-    // cout<<"*****************FILTERED ROWS :"<<_produced<<endl;
-    if (!outFile) {
-        std::cerr << "Error opening file for writing." << std::endl;
-        return 1;
-    }
+    // std::ofstream outFile("input.txt", std::ios::app);
+    // // cout<<"*****************FILTERED ROWS :"<<_produced<<endl;
+    // if (!outFile) {
+    //     std::cerr << "Error opening file for writing." << std::endl;
+    //     return 1;
+    // }
 
-    // Write each string from the vector to the file
-    for (const auto& line : temp) {
-        // cout<<line<<"--------"<<endl;
-        outFile << line << std::endl;
-    }
+    // // Write each string from the vector to the file
+    // for (const auto& line : temp) {
+    //     // cout<<line<<"--------"<<endl;
+    //     outFile << line << std::endl;
+    // }
 
-    // Close the file
-    outFile.close();
+    // // Close the file
+    // outFile.close();
 
     // std::cout << "File written successfully." << std::endl;
 	
