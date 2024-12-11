@@ -23,20 +23,25 @@ All records scanned
 
 ************************************************************************
 Stats for input 
-Parity Check(XOR): 0
+Parity Check(XOR): 10
 Number of inversions : 0 
-Witnessed rows : 0 
+Witnessed rows : 1 
 ************************************************************************
 Scan.cpp:51:~ScanIterator produced 4 of 4 rows
 
 *********Input generation complete!!********
-Filter.cpp:39:~FilterIterator produced 0 of 4 rows
-No records are present to be sorted, filtered out by the Filter!
-Iterator.cpp:41:run entire plan produced 0 rows
+Filter.cpp:39:~FilterIterator produced 1 of 4 rows
+
+
+Completed the sort!!
+
+***************Execution time for exeternal merge sort: 0.378625 ms ***************
+Sort.cpp:200:SortIterator *** The main thing! *** consumed 1 rows
+Iterator.cpp:41:run entire plan produced 1 rows
 ************************************************************************
 Stats for output 
-Parity Check(XOR): 0
+Parity Check(XOR): 10
 Number of inversions : 0 
-Witnessed rows : 0 
+Witnessed rows : 1 
 ************************************************************************
-Sort.cpp:210:~SortIterator *** The main thing! *** produced 0 of 0 rows
+Sort.cpp:210:~SortIterator *** The main thing! *** produced 1 of 1 rows

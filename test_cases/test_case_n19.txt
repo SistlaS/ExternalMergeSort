@@ -23,25 +23,25 @@ All records scanned
 
 ************************************************************************
 Stats for input 
-Parity Check(XOR): 12
-Number of inversions : 3 
-Witnessed rows : 8 
+Parity Check(XOR): 15
+Number of inversions : 2 
+Witnessed rows : 4 
 ************************************************************************
 Scan.cpp:51:~ScanIterator produced 19 of 19 rows
 
 *********Input generation complete!!********
-Filter.cpp:39:~FilterIterator produced 8 of 19 rows
+Filter.cpp:39:~FilterIterator produced 4 of 19 rows
 
 
 Completed the sort!!
 
-***************Execution time for exeternal merge sort: 1.08533 ms ***************
-Sort.cpp:200:SortIterator *** The main thing! *** consumed 8 rows
-Iterator.cpp:41:run entire plan produced 8 rows
+***************Execution time for exeternal merge sort: 0.587416 ms ***************
+Sort.cpp:200:SortIterator *** The main thing! *** consumed 4 rows
+Iterator.cpp:41:run entire plan produced 4 rows
 ************************************************************************
 Stats for output 
-Parity Check(XOR): 12
+Parity Check(XOR): 15
 Number of inversions : 0 
-Witnessed rows : 8 
+Witnessed rows : 4 
 ************************************************************************
-Sort.cpp:210:~SortIterator *** The main thing! *** produced 8 of 8 rows
+Sort.cpp:210:~SortIterator *** The main thing! *** produced 4 of 4 rows

@@ -1,12 +1,10 @@
 Program usage:
-User may provide two arguments: number of records(to be sorted) [with -n option] and input sort order [with -i option]
+User may provide one argument: number of records(to be sorted) [with -n option]
 Program Behaviours:
-1.If you have not specified either or any of the required arguments, we assume default values of:	Number of records: 10000 and input sort order: unsorted input
+1.If you have not specified either or any of the required arguments, we assume default values of:	Number of records: 10000
 2.The number of records must be greater than or equal to 0.
-3.Sort order must be -1, 0, or 1 for descending sorted input, unsorted input, and ascending sorted input
 
 *********Number of records: 1500***********
-Input will be unsorted
 
 *********Input generation start!!********
 *************** SYSTEM CONFIGURATION USED (in # of records) ***************
@@ -25,25 +23,25 @@ All records scanned
 
 ************************************************************************
 Stats for input 
-Parity Check(XOR): 10
-Number of inversions : 309 
-Witnessed rows : 608 
+Parity Check(XOR): 9
+Number of inversions : 328 
+Witnessed rows : 634 
 ************************************************************************
-Scan.cpp:59:~ScanIterator produced 1500 of 1500 rows
+Scan.cpp:51:~ScanIterator produced 1500 of 1500 rows
 
 *********Input generation complete!!********
-Filter.cpp:39:~FilterIterator produced 608 of 1500 rows
+Filter.cpp:39:~FilterIterator produced 634 of 1500 rows
 
 
 Completed the sort!!
 
-***************Execution time for exeternal merge sort: 4717.41 ms ***************
-Sort.cpp:200:SortIterator *** The main thing! *** consumed 608 rows
-Iterator.cpp:41:run entire plan produced 608 rows
+***************Execution time for exeternal merge sort: 19.2789 ms ***************
+Sort.cpp:200:SortIterator *** The main thing! *** consumed 634 rows
+Iterator.cpp:41:run entire plan produced 634 rows
 ************************************************************************
 Stats for output 
-Parity Check(XOR): 10
+Parity Check(XOR): 9
 Number of inversions : 0 
-Witnessed rows : 608 
+Witnessed rows : 634 
 ************************************************************************
-Sort.cpp:210:~SortIterator *** The main thing! *** produced 608 of 608 rows
+Sort.cpp:210:~SortIterator *** The main thing! *** produced 634 of 634 rows
