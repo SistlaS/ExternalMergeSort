@@ -17,6 +17,8 @@ On a Linux terminal:
 
 2) Run the program using the command `./Test.exe -n XYZ`, where XYZ indicates the number of records to be generated & sorted.
 
+Final output is stored in Output.txt (after removing the OVCs).
+
 
 ********NOTE********
 1. Our record is of length 4 with each column value in the range of [0,9] -- |a,b,c,d|. These fields are configurable in the config.
