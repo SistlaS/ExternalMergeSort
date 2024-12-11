@@ -11,7 +11,7 @@ int main (int argc, char * argv [])
 
     cout << "Program usage:\nUser may provide one arguments: number of records(to be sorted) [with -n option]\n";
     cout << "Program Behaviours:\n1.If you have not specified either or any of the required arguments, we assume default values of:\tNumber of records: " << num_records << endl;
-    cout << "2.The number of records must be between greater than 1.\n";
+    cout << "2.The number of records must be greater than or equal to 0.\n";
 
     if(argc < 2){
         cout<< "You have not specified any arguments - hence we take default values of: \tNumber of records: " << num_records << endl;
@@ -27,7 +27,7 @@ int main (int argc, char * argv [])
                     } else if(num_records == 0){
                         cout<<"Number of records entered = 0.\n There are no records in the database ----- Exiting the program\n";
                     } else{
-                        cout<<"*********Number of records: "<<num_records<<endl;
+                        cout<<"\n*********Number of records: "<<num_records<<"***********"<<endl;
                     }
                 } catch (const exception& e) {
                     num_records = 10000;

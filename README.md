@@ -6,16 +6,19 @@ To simulate a three-tier memory model(Cache, RAM, and Disk), and to implement an
 
 Implemented as part of the CS764 course - Topics in Database Systems, in the Fall 2024 semester at UW-Madison.
 
+
+
 How to Run:
 
-On a Linux terminal:
 
+
+On a Linux terminal:
 
 0) `cd` into the project folder. Run the command `make clean` to remove any intermediate/generated files
 
 1) Build the project using the command `make`
 
-2) Run the program using the command `./Test.exe`
+2) Run the program using the command `./Test.exe -n XYZ`, where XYZ indicates the number of records to be generated & sorted.
 
 
 Optimizations Implemented:
@@ -50,12 +53,13 @@ Implemented in Sort.cpp, Line XYZ
 
 Optimize cache usage by merging cache-size miniruns, using cache-level tournament trees
 
+5) Cache-Size Runs
+
+Optimize cache usage by merging cache-size miniruns, using cache-level tournament trees
 
 Members:
 
-1) Amith Bhat Nekkare
-   Campus ID: 9087340890
+1) Campus ID: 9087340890
 
-2) Soumya Sistla
-   Campus ID: 
+2) Campus ID: 9087207966
 
