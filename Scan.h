@@ -22,7 +22,7 @@ public:
 	bool next (Row & row);
 	void free (Row & row);
     int generate_rand_int();
-    int sortOrder = 1; // -1 if desc sort input, 0 for neutral, 1 for asc sort input
+    int sortOrder = 0; // -1 if desc sort input, 0 for neutral, 1 for asc sort input
     std::ifstream inFileSpecial;
 	string _currLine;
 private:

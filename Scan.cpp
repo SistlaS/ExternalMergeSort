@@ -44,8 +44,10 @@ ScanIterator::ScanIterator (ScanPlan const * const plan, int sortOrder) :
 	TRACE (true);
     cout<<"\n*********Input generation start!!********"<<endl;
     if(sortOrder==1){
+        cout<<"Test case: Sorted (Ascending) Input!!\n"; // change the value in line 25 @ Scan.h
         inFileSpecial.open("sort-asc-input.txt");
     } else if(sortOrder==-1){
+        cout<<"Test case: Sorted (Descending) Input!!\n"; // change the value in line 25 @ Scan.h
         inFileSpecial.open("sort-desc-input.txt");
     }
 
