@@ -18,6 +18,12 @@ On a Linux terminal:
 2) Run the program using the command `./Test.exe -n XYZ`, where XYZ indicates the number of records to be generated & sorted.
 
 
+********NOTE********
+1. Our record is of length 4 with each column value in the range of [0,9] -- |a,b,c,d|. These fields are configurable in the config.
+2. The program works efficiently for input size  <= cache size and <= ram size by doing internal sort only and gracefully degrading to external sort once the input size is greater than ram size. 
+3. Duplicates are preserved as shown in one of the test cases(Eg: for n = 40000, the data generating algo is bound to generate duplicates as |a,b,c,d| with a/b/c/d in [0,9] has only 10000 unique possible permutations).
+*********************
+
 Filter: (in Filter.cpp)
 1) Implements a basic predicate of filtering out rows that have column value less than 2 : L45
 
