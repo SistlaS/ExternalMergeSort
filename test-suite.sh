@@ -11,7 +11,7 @@ OUTPUT_DIR="test_cases"
 mkdir -p "$OUTPUT_DIR"
 
 # Run Test.exe with different test sizes
-TEST_SIZES=(-2 0 1 4 19 91 252 921 1256 )
+TEST_SIZES=(-2 0 1 4 19 91 252 921 1256 8889 40000 235875 500000 1000000)
 for SIZE in "${TEST_SIZES[@]}"; do
     OUTPUT_FILE="$OUTPUT_DIR/test_case_n${SIZE}.txt"
     echo "Generating test case with -n $SIZE..."
