@@ -9,7 +9,7 @@ CPU cache sized runs            3                               3
 Recycling the Priority Queue    2                               2
 Minimum # of row comparisons    5                               5
 Minimum # of column comparisons 5                               5
-Good test cases + correct       4                               5
+Good test cases + correct       4                               4
 Test case performance           2                               2
 Scan                            1                               1
 Witness-count,parity,inversions 3                               3
