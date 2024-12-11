@@ -11,10 +11,10 @@ int main (int argc, char * argv [])
 
     cout << "Program usage:\nUser may provide one arguments: number of records(to be sorted) [with -n option]\n";
     cout << "Program Behaviours:\n1.If you have not specified either or any of the required arguments, we assume default values of:\tNumber of records: " << num_records << endl;
-    cout << "2.The number of records must be between 1 and 10^8.\n";
+    cout << "2.The number of records must be between greater than 1.\n";
 
     if(argc < 2){
-        cout<< "You have not specified any arguments - hence we take default values of:\n \tNumber of records: " << num_records << endl;
+        cout<< "You have not specified any arguments - hence we take default values of: \tNumber of records: " << num_records << endl;
     }
 
     for (int i = 1; i < argc; ++i) {

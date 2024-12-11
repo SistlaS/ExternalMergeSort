@@ -1,4 +1,5 @@
 #include "Iterator.h"
+#include <vector>
 
 class WitnessPlan : public Plan
 {
