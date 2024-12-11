@@ -24,8 +24,10 @@ int main (int argc, char * argv [])
                     num_records = stoi(argv[++i]);
                     if(num_records < 0){
                         cout<<"We cannot have negative number of records in the database ----- Exiting the program\n";
+                        exit(1);
                     } else if(num_records == 0){
                         cout<<"Number of records entered = 0.\n There are no records in the database ----- Exiting the program\n";
+                        exit(0);
                     } else{
                         cout<<"\n*********Number of records: "<<num_records<<"***********"<<endl;
                     }

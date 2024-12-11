@@ -178,6 +178,11 @@ SortIterator::SortIterator (SortPlan const * const plan) :
         generateCacheRuns(row,true);
     }
 
+    if(_consumed==0){
+        cout<<"No records are present to be sorted, filtered out by the Filter!\n";
+        return;
+    }
+
     
     //Step 4: sort into RAM-sized runs
     ramSort();
