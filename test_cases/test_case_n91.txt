@@ -1,0 +1,47 @@
+Program usage:
+User may provide one argument: number of records(to be sorted) [with -n option]
+Program Behaviours:
+1.If you have not specified either or any of the required arguments, we assume default values of:	Number of records: 10000
+2.The number of records must be greater than or equal to 0.
+
+*********Number of records: 91***********
+
+*********Input generation start!!********
+*************** SYSTEM CONFIGURATION USED (in # of records) ***************
+RAM CAPACITY : 1024
+BUFFER CAPACITY : 32
+CACHE CAPACITY : 16
+PAGE SIZE : 4
+**********************************************************
+
+
+Starting the sort now:
+
+
+
+All records scanned
+
+************************************************************************
+Stats for input 
+Parity Check(XOR): 11
+Number of inversions : 20 
+Witnessed rows : 40 
+************************************************************************
+Scan.cpp:51:~ScanIterator produced 91 of 91 rows
+
+*********Input generation complete!!********
+Filter.cpp:39:~FilterIterator produced 40 of 91 rows
+
+
+Completed the sort!!
+
+***************Execution time for exeternal merge sort: 2.32979 ms ***************
+Sort.cpp:200:SortIterator *** The main thing! *** consumed 40 rows
+Iterator.cpp:41:run entire plan produced 40 rows
+************************************************************************
+Stats for output 
+Parity Check(XOR): 11
+Number of inversions : 0 
+Witnessed rows : 40 
+************************************************************************
+Sort.cpp:210:~SortIterator *** The main thing! *** produced 40 of 40 rows

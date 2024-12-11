@@ -1,0 +1,42 @@
+Program usage:
+User may provide one argument: number of records(to be sorted) [with -n option]
+Program Behaviours:
+1.If you have not specified either or any of the required arguments, we assume default values of:	Number of records: 10000
+2.The number of records must be greater than or equal to 0.
+
+*********Number of records: 4***********
+
+*********Input generation start!!********
+*************** SYSTEM CONFIGURATION USED (in # of records) ***************
+RAM CAPACITY : 1024
+BUFFER CAPACITY : 32
+CACHE CAPACITY : 16
+PAGE SIZE : 4
+**********************************************************
+
+
+Starting the sort now:
+
+
+
+All records scanned
+
+************************************************************************
+Stats for input 
+Parity Check(XOR): 0
+Number of inversions : 0 
+Witnessed rows : 0 
+************************************************************************
+Scan.cpp:51:~ScanIterator produced 4 of 4 rows
+
+*********Input generation complete!!********
+Filter.cpp:39:~FilterIterator produced 0 of 4 rows
+No records are present to be sorted, filtered out by the Filter!
+Iterator.cpp:41:run entire plan produced 0 rows
+************************************************************************
+Stats for output 
+Parity Check(XOR): 0
+Number of inversions : 0 
+Witnessed rows : 0 
+************************************************************************
+Sort.cpp:210:~SortIterator *** The main thing! *** produced 0 of 0 rows
