@@ -24,3 +24,16 @@ for SIZE in "${TEST_SIZES[@]}"; do
 done
 
 echo "All test cases generated in $OUTPUT_DIR."
+
+# README
+# Test cases have been generated to cover various conditions, edge cases, and large input sizes.
+
+# A. Edge case: numRecords =  -2 (Negative number) : Invalid input, so fails 
+# B. Edge case: numRecords = 0 : No records, nothing to generate
+
+# C. numRecords = 1 - 10,00,000 : Sort works for different input sizes
+
+# D. Duplicate Handling -- Given that our maximum column value is 9, and column count is 4, the maximum number of unique records = 10^4 = 10000.
+# Hence, any testcase with greater than 10000 records will contain duplicates. Hence this scenario is tested as well.
+
+# E. Sorted(Asc/Desc) Input -- Scenario is tested and validated to work correctly. Implemented in Line 46 @ Scan.cpp (Limitation, handles upto 1,00,000 records only)

@@ -51,5 +51,5 @@ co :
 clean :
 	@rm -f $(OBJS) Cache.txt RAM.txt RAM2.txt Disk.txt Disk2.txt input.txt Output.txt Test.exe Test.exe.stackdump trace
 
-rm-test-op:
+rm-test-dir:
 	@rm -rf test_cases
