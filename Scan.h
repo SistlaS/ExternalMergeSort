@@ -1,5 +1,6 @@
 # pragma once
 #include "Iterator.h"
+#include <fstream>
 
 class ScanPlan : public Plan
 {
@@ -8,6 +9,7 @@ public:
 	ScanPlan (char const * const name, RowCount const count);
 	~ScanPlan ();
 	Iterator * init () const;
+
 private:
 	RowCount const _count;
 }; // class ScanPlan
@@ -15,11 +17,14 @@ private:
 class ScanIterator : public Iterator
 {
 public:
-	ScanIterator (ScanPlan const * const plan);
+	ScanIterator (ScanPlan const * const plan, int sortOrder);
 	~ScanIterator ();
 	bool next (Row & row);
 	void free (Row & row);
     int generate_rand_int();
+    int sortOrder = 1; // -1 if desc sort input, 0 for neutral, 1 for asc sort input
+    std::ifstream inFileSpecial;
+	string _currLine;
 private:
 	ScanPlan const * const _plan;
 	RowCount _count;

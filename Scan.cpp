@@ -24,7 +24,7 @@ ScanPlan::~ScanPlan ()
 Iterator * ScanPlan::init () const
 {
 	TRACE (true);
-	return new ScanIterator (this);
+	return new ScanIterator (this,1);
 } // ScanPlan::init
 
 int ScanIterator::generate_rand_int() {
@@ -38,11 +38,17 @@ int ScanIterator::generate_rand_int() {
 
 /* ***********************ScanIterator****************************** */
 
-ScanIterator::ScanIterator (ScanPlan const * const plan) :
-	_plan (plan), _count (0)
+ScanIterator::ScanIterator (ScanPlan const * const plan, int sortOrder) :
+	_plan (plan), _count (0), sortOrder(sortOrder)
 {
 	TRACE (true);
     cout<<"\n*********Input generation start!!********"<<endl;
+    if(sortOrder==1){
+        inFileSpecial.open("sort-asc-input.txt");
+    } else if(sortOrder==-1){
+        inFileSpecial.open("sort-desc-input.txt");
+    }
+
 } // ScanIterator::ScanIterator
 
 ScanIterator::~ScanIterator ()
@@ -56,21 +62,32 @@ ScanIterator::~ScanIterator ()
 
 bool ScanIterator::next (Row & row)
 {
+
 	TRACE (true);
     if (_count >= _plan->_count){
         cout<<"\n\nAll records scanned\n\n";
 		return false;
     }
 
-    // generate `numRecords` number of input data with `column_count` number of columns, and store in file
-    string record;
-    for(int i=0;i<Config::column_count;i++){
-        int s = generate_rand_int();
-        record += to_string(s) + ",";
+    if(sortOrder!=0){
+        if (inFileSpecial.is_open()){
+            if (getline(inFileSpecial, _currLine, '|')){
+                row.setRow(_currLine+"|");
+            }
+	    }
     }
-    record += "|";
+    else{
+        // generate `numRecords` number of input data with `column_count` number of columns, and store in file
+        string record;
+        for(int i=0;i<Config::column_count;i++){
+            int s = generate_rand_int();
+            record += to_string(s) + ",";
+        }
+        record += "|";
 
-    row.setRow(record);    
+        row.setRow(record);    
+    }
+
 	++ _count;
 
 	return true;
