@@ -165,7 +165,7 @@ SortIterator::SortIterator (SortPlan const * const plan) :
     auto start = chrono::high_resolution_clock::now();
 
     // Steps 1 & 2
-    cout<<"\nStarting the sort now:\n";
+    cout<<"\n\nStarting the sort now:\n\n";
     for (Row row;  _input->next (row);  _input->free (row)){
         generateCacheRuns(row,false);
     }
@@ -200,7 +200,7 @@ SortIterator::SortIterator (SortPlan const * const plan) :
 	traceprintf ("%s consumed %lu rows\n",
 			_plan->_name,
 			(unsigned long) (_consumed));
-    outFile.open("Disk.txt");
+    outFile.open(disk);
 } // SortIterator::SortIterator
 
 SortIterator::~SortIterator ()

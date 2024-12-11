@@ -9,7 +9,7 @@ int main (int argc, char * argv [])
 {
 	int num_records = 10000;
 
-    cout << "Program usage:\nUser may provide one arguments: number of records(to be sorted) [with -n option]\n";
+    cout << "Program usage:\nUser may provide one argument: number of records(to be sorted) [with -n option]\n";
     cout << "Program Behaviours:\n1.If you have not specified either or any of the required arguments, we assume default values of:\tNumber of records: " << num_records << endl;
     cout << "2.The number of records must be greater than or equal to 0.\n";
 
