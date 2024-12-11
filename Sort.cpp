@@ -142,11 +142,11 @@ SortIterator::SortIterator (SortPlan const * const plan) :
 {
 	TRACE (true);
 
-    printf("*************** SYSTEM CONFIGURATION USED (in # of records) ***************\n");
-    printf("RAM CAPACITY : %lu \n", Config::ram_capacity);
-    printf("BUFFER CAPACITY : %lu \n", Config::ram_buffer_capacity);
-    printf("CACHE CAPACITY : %lu \n", Config::num_cache_TT_leaf_nodes);
-    printf("PAGE SIZE : %lu \n", Config::page_size);
+    cout<<"*************** SYSTEM CONFIGURATION USED (in # of records) ***************\n";
+    cout<<"RAM CAPACITY : "<<Config::ram_capacity<<endl;
+    cout<<"BUFFER CAPACITY : "<<Config::ram_buffer_capacity<<endl;
+    cout<<"CACHE CAPACITY : "<<Config::num_cache_TT_leaf_nodes<<endl;
+    cout<<"PAGE SIZE : "<<Config::page_size<<endl;
     printf("**********************************************************\n");
 
 

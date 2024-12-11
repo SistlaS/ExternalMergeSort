@@ -34,7 +34,7 @@ WitnessIterator::~WitnessIterator ()
 
 	cout<<"************************************************************************"<<endl;
 	printf("Stats for %s \n",_plan->_name);
-	printf("Parity Check(XOR) : %lu \n",XOR);
+    cout<<"Parity Check(XOR): "<<XOR<<endl;
 	printf("Number of inversions : %lu \n", (unsigned long) (_inversions));
 	printf("Witnessed rows : %lu \n",(unsigned long) (_rows));
 	// traceprintf ("%s witnessed %lu rows\n",
