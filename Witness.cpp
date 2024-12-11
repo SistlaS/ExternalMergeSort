@@ -25,7 +25,6 @@ WitnessIterator::WitnessIterator (WitnessPlan const * const plan) :
 	_rows (0), XOR(0), _inversions(0), _hasPrevious(false)
 {
 	TRACE (true);
-	// cout<<"When is this printing"<<endl;
 } // WitnessIterator::WitnessIterator
 
 
@@ -35,7 +34,7 @@ WitnessIterator::~WitnessIterator ()
 
 	cout<<"************************************************************************"<<endl;
 	printf("Stats for %s \n",_plan->_name);
-	printf("XOR : %llu \n",XOR);
+    cout<<"Parity Check(XOR): "<<XOR<<endl;
 	printf("Number of inversions : %lu \n", (unsigned long) (_inversions));
 	printf("Witnessed rows : %lu \n",(unsigned long) (_rows));
 	// traceprintf ("%s witnessed %lu rows\n",
@@ -47,17 +46,6 @@ WitnessIterator::~WitnessIterator ()
 } // WitnessIterator::~WitnessIterator
 
 void WitnessIterator::computeXOR(vector<int> data){
-	// string data = row.row;
-	// // cout<<row.row<<endl;
-	
-	// if(data.back() == '|') data.pop_back();
-	// stringstream ss(data);
-	// string number;
-	// int ct = 0;
-	// while (getline(ss, number, ',') && ct < Config::column_count) {
-	// 	XOR ^= stoi(number); // Convert to integer and XOR
-	// 	ct += 1;
-	// }
 
 	for (int i = 0; i < Config::column_count; i++){
 		XOR ^= data[i];

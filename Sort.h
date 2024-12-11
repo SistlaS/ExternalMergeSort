@@ -22,7 +22,7 @@ public:
 	bool next (Row & row);
 	void free (Row & row);
     void generateCacheRuns(Row row, bool lastBatch);
-    void ramExternalSort();
+    void ramSort();
     void diskExternalSort();
     void mergeSort(bool isDiskSort, int numRuns);
     static RowCount _ramUsed, _ramBufferUsed, _bufferSpills;
@@ -38,5 +38,5 @@ private:
 }; // class SortIterator
 
 void insertCacheRunsInRAM(string cacheRun);
-void spillBufferToDisk();
+void spillRunToDisk(string cacheRun);
 

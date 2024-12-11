@@ -19,8 +19,7 @@ OBJS=	defs.o Assert.o Test.o \
 REV=-q -f
 MSG=no message-Wall -ansi -pedantic -std=c++11 -Iinclude -Wno-reorder
 
-# default target
-#
+
 Test.exe : Makefile $(OBJS)
 	g++ $(CPPFLAGS) -o Test.exe $(OBJS)
 
@@ -50,4 +49,7 @@ co :
 	co $(REV) -l $(HDRS) $(SRCS) $(DOCS) $(SCRS)
 
 clean :
-	@rm -f $(OBJS) Cache.txt RAM.txt RAM2.txt RAM3.txt Disk.txt Disk2.txt input.txt Test.exe Test.exe.stackdump trace
+	@rm -f $(OBJS) Cache.txt RAM.txt RAM2.txt Disk.txt Disk2.txt input.txt Output.txt Test.exe Test.exe.stackdump trace
+
+rm-test-dir:
+	@rm -rf test_cases
