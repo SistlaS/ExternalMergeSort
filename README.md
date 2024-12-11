@@ -7,10 +7,7 @@ To simulate a three-tier memory model(Cache, RAM, and Disk), and to implement an
 Implemented as part of the CS764 course - Topics in Database Systems, in the Fall 2024 semester at UW-Madison.
 
 
-
-How to Run:
-
-
+Steps to Run:
 
 On a Linux terminal:
 
@@ -21,17 +18,27 @@ On a Linux terminal:
 2) Run the program using the command `./Test.exe -n XYZ`, where XYZ indicates the number of records to be generated & sorted.
 
 
+Filter: (in Filter.cpp)
+1) Implements a basic predicate of filtering out rows that have column value less than 2 : L45
+
+Witness: (in Witness.cpp)
+1) Checks for the number of rows : L101
+2) Parity(XOR) of the data : L48
+3) Number of inversions : L83
+
 Optimizations Implemented:
 
 1) Tournament Trees:
 
-We use the Tree of Losers to minimize the number of root-to-leaf passes required. Implemented in the file Tree.cpp, Line XYZ
+We use the Tree of Losers to minimize the number of root-to-leaf passes required. Implemented in the file Tree.cpp : L379, L290, L213
 
 2) Offset-Value Coding
 
 We minimize the number of comparisons between keys in a record by computing each record's OVC, and comparing the OVCs. Ensures minimum number of row comparisons and minimum number of column comparisons.
 
- Implemented in the file Tree.cpp, Line XYZ
+ Implemented in the file Tree.cpp:
+ 1. OVC comparisons : L112
+ 2. OVCs are written to the disk inorder to avoid recomputing the offsets in every merge step : L75
 
 3) Graceful Degradation
 
