@@ -10,8 +10,8 @@ using namespace std;
 Config config;
 
 /* ***********************ScanPlan****************************** */
-ScanPlan::ScanPlan (char const * const name, RowCount const count)
-	: Plan (name), _count (count)
+ScanPlan::ScanPlan (char const * const name, RowCount const count, int order)
+	: Plan (name), _count (count), order(order)
 {
 	TRACE (true);
 } // ScanPlan::ScanPlan
@@ -24,7 +24,7 @@ ScanPlan::~ScanPlan ()
 Iterator * ScanPlan::init () const
 {
 	TRACE (true);
-	return new ScanIterator (this,1);
+	return new ScanIterator (this,order);
 } // ScanPlan::init
 
 int ScanIterator::generate_rand_int() {
@@ -38,16 +38,16 @@ int ScanIterator::generate_rand_int() {
 
 /* ***********************ScanIterator****************************** */
 
-ScanIterator::ScanIterator (ScanPlan const * const plan, int sortOrder) :
-	_plan (plan), _count (0), sortOrder(sortOrder)
+ScanIterator::ScanIterator (ScanPlan const * const plan, int order) :
+	_plan (plan), _count (0), sortOrder(order)
 {
 	TRACE (true);
     cout<<"\n*********Input generation start!!********"<<endl;
-    if(sortOrder==1){
-        cout<<"Test case: Sorted (Ascending) Input!!\n"; // change the value in line 25 @ Scan.h
+    if(order==1){
+        cout<<"Test case: Sorted (Ascending) Input!!\n";
         inFileSpecial.open("sort-asc-input.txt");
-    } else if(sortOrder==-1){
-        cout<<"Test case: Sorted (Descending) Input!!\n"; // change the value in line 25 @ Scan.h
+    } else if(order==-1){
+        cout<<"Test case: Sorted (Descending) Input!!\n"; 
         inFileSpecial.open("sort-desc-input.txt");
     }
 
@@ -74,7 +74,9 @@ bool ScanIterator::next (Row & row)
     if(sortOrder!=0){
         if (inFileSpecial.is_open()){
             if (getline(inFileSpecial, _currLine, '|')){
-                row.setRow(_currLine+"|");
+                if(_currLine!="\n" or _currLine!=""){
+                    row.setRow(_currLine+"|");
+                }
             }
 	    }
     }

@@ -6,9 +6,10 @@ class ScanPlan : public Plan
 {
 	friend class ScanIterator;
 public:
-	ScanPlan (char const * const name, RowCount const count);
+	ScanPlan (char const * const name, RowCount const count, int order);
 	~ScanPlan ();
 	Iterator * init () const;
+    int order;
 
 private:
 	RowCount const _count;
@@ -22,7 +23,7 @@ public:
 	bool next (Row & row);
 	void free (Row & row);
     int generate_rand_int();
-    int sortOrder = 0; // -1 if desc sort input, 0 for neutral, 1 for asc sort input
+    int sortOrder; // -1 if desc sort input, 0 for neutral, 1 for asc sort input
     std::ifstream inFileSpecial;
 	string _currLine;
 private:
